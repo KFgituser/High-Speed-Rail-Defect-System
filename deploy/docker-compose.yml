@@ -1,0 +1,20 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: rail-defect-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rail_defect_root
+      MYSQL_DATABASE: railline
+      MYSQL_USER: rail_user
+      MYSQL_PASSWORD: rail_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - rail_defect_mysql:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+
+volumes:
+  rail_defect_mysql:
