@@ -26,11 +26,29 @@ VIZ_LANG=en
 
 ## Required Local Artifacts
 
-The scripts are kept in the repository as integration entry points for portfolio review. A full local run may still require environment-specific artifacts:
+The scripts are kept in the repository as integration entry points for portfolio review. The 2D pipeline also includes its small Python source dependencies:
+
+```text
+model_generate.py
+model.py
+conv1d_model.py
+result_vote.py
+data_save.py
+data_collect.py
+cluster_for_train.py
+external_excel_true_position_label.py
+```
+
+Install the Python package dependencies with:
+
+```bash
+pip install -r requirements.txt
+```
+
+A full local run may still require environment-specific artifacts:
 
 - model checkpoints under `backend/scripts/check_point/`
 - raw DAS `.npy` data files
 - generated intermediate files such as `amps_stack.npy`, `x_labels.npy`, and `total_time_seconds.npy`
-- local Python packages such as `numpy`, `matplotlib`, and, for the 2D model pipeline, `torch` and related model modules
 
 These files are excluded to keep the repository lightweight and safe for GitHub.
