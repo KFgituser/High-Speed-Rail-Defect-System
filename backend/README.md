@@ -1,43 +1,43 @@
 # Backend
 
-Spring Boot 后端服务，提供登录认证、缺陷查询、台账查询、数据导出和 2D/3D 可视化任务接口。
+Spring Boot backend service for authentication, defect queries, maintenance ledger queries, Excel export, and 2D/3D visualization task APIs.
 
-## 环境要求
+## Requirements
 
 - Java 17
 - MySQL 8.x
-- Maven Wrapper 已包含在仓库中
+- Maven Wrapper, included in this directory
 
-## 启动
+## Start The Service
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-Windows:
+On Windows:
 
 ```powershell
 .\mvnw.cmd spring-boot:run
 ```
 
-## 常用环境变量
+## Environment Variables
 
-| 变量 | 默认值 | 说明 |
+| Variable | Default | Description |
 | --- | --- | --- |
-| `SERVER_PORT` | `8080` | 后端服务端口 |
-| `DB_URL` | `jdbc:mysql://localhost:3306/railline?...` | MySQL 连接地址 |
-| `DB_USERNAME` | `root` | 数据库账号 |
-| `DB_PASSWORD` | 空 | 数据库密码 |
-| `JWT_SECRET` | 示例值 | JWT 签名密钥，部署时必须替换 |
-| `PYTHON_EXE` | `C:/Python313/python.exe` | Python 解释器路径 |
-| `ANALYZE_SCRIPT` | `./scripts/plot_npy.py` | NPY 分析脚本 |
-| `VIZ_SCRIPT_2D` | `./scripts/front_side_2D.py` | 2D 可视化脚本 |
-| `VIZ_SCRIPT_3D` | `./scripts/front_side_3D.py` | 3D 可视化脚本 |
+| `SERVER_PORT` | `8080` | Backend service port. |
+| `DB_URL` | `jdbc:mysql://localhost:3306/railline?...` | MySQL connection URL. |
+| `DB_USERNAME` | `root` | Database username. |
+| `DB_PASSWORD` | Empty | Database password. |
+| `JWT_SECRET` | Example value | JWT signing secret. Replace it before deployment. |
+| `PYTHON_EXE` | `C:/Python313/python.exe` | Python executable path. |
+| `ANALYZE_SCRIPT` | `./scripts/plot_npy.py` | NPY analysis script path. |
+| `VIZ_SCRIPT_2D` | `./scripts/front_side_2D.py` | 2D visualization script path. |
+| `VIZ_SCRIPT_3D` | `./scripts/front_side_3D.py` | 3D visualization script path. |
 
-## 主要模块
+## Main Modules
 
-- `controller`: REST API 控制器
-- `service`: 查询、可视化任务和结果处理
-- `repository`: JPA 数据访问
-- `security`: JWT 认证与过滤器
-- `viz`: Python 脚本调用封装
+- `controller`: REST API controllers.
+- `service`: Business logic, query handling, visualization task handling, and result processing.
+- `repository`: Spring Data JPA repositories.
+- `security`: JWT authentication and request filtering.
+- `viz`: Python script execution wrapper.

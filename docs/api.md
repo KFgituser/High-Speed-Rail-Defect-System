@@ -1,60 +1,66 @@
-# API 说明
+# API Reference
 
-后端默认基础地址：
+Default backend base URL:
 
 ```text
 http://localhost:8080/api
 ```
 
-## 认证
+## Authentication
 
-| 方法 | 路径 | 说明 |
+| Method | Endpoint | Description |
 | --- | --- | --- |
-| `POST` | `/login` | 用户登录，返回认证信息 |
+| `POST` | `/login` | Authenticates a user and returns login credentials or token information. |
 
-## 元数据
+## Metadata
 
-| 方法 | 路径 | 说明 |
+| Method | Endpoint | Description |
 | --- | --- | --- |
-| `GET` | `/lines` | 查询线路列表 |
-| `GET` | `/disease-types` | 查询病害类型列表 |
+| `GET` | `/lines` | Returns the available railway lines. |
+| `GET` | `/disease-types` | Returns the available defect or disease types. |
 
-## 缺陷与台账
+## Defect And Ledger Data
 
-| 方法 | 路径 | 说明 |
+| Method | Endpoint | Description |
 | --- | --- | --- |
-| `GET` | `/detections` | 查询缺陷检测结果 |
-| `GET` | `/ledgers` | 查询病害台账 |
-| `GET` | `/details/{id}` | 查询缺陷或台账详情 |
+| `GET` | `/detections` | Queries defect detection results. |
+| `GET` | `/ledgers` | Queries maintenance ledger records. |
+| `GET` | `/details/{id}` | Returns detail data for a detection or ledger item. |
 
-常用查询参数：
+Common query parameters:
 
-| 参数 | 说明 |
+| Parameter | Description |
 | --- | --- |
-| `line` | 线路名称 |
-| `type` | 病害类型 |
-| `start` | 起始日期 |
-| `end` | 结束日期 |
+| `line` | Railway line name. |
+| `type` | Defect type. |
+| `start` | Start date. |
+| `end` | End date. |
 
-## 导出
+## Export
 
-| 方法 | 路径 | 说明 |
+| Method | Endpoint | Description |
 | --- | --- | --- |
-| `GET` | `/export-detection` | 导出检测结果 |
-| `GET` | `/export-ledger` | 导出台账 |
-| `GET` | `/export-all` | 导出全部数据 |
+| `GET` | `/export-detection` | Exports defect detection results as an Excel file. |
+| `GET` | `/export-ledger` | Exports maintenance ledger records as an Excel file. |
+| `GET` | `/export-all` | Exports the combined dataset as an Excel file. |
 
-## 可视化
+## Visualization
 
-| 方法 | 路径 | 说明 |
+| Method | Endpoint | Description |
 | --- | --- | --- |
-| `POST` | `/viz/run2d` | 启动 2D 可视化 |
-| `GET` | `/viz/run2d/stream` | 监听 2D 任务输出 |
-| `POST` | `/viz3d/run` | 启动 3D 可视化 |
-| `GET` | `/viz3d/status/{uuid}` | 查询 3D 任务状态 |
-| `GET` | `/slots` | 查询可视化槽位 |
-| `POST` | `/slots/{slotId}` | 保存槽位 |
-| `DELETE` | `/slots/{slotId}` | 删除槽位 |
-| `POST` | `/slots/{slotId}/snapshot` | 保存槽位快照 |
+| `POST` | `/viz/run2d` | Starts a 2D visualization task. |
+| `GET` | `/viz/run2d/stream` | Streams 2D visualization task output. |
+| `POST` | `/viz3d/run` | Starts a 3D visualization task. |
+| `GET` | `/viz3d/status/{uuid}` | Returns the status of a 3D visualization task. |
+| `GET` | `/slots` | Lists visualization slots. |
+| `POST` | `/slots/{slotId}` | Saves a visualization slot. |
+| `DELETE` | `/slots/{slotId}` | Deletes a visualization slot. |
+| `POST` | `/slots/{slotId}/snapshot` | Saves a snapshot for a visualization slot. |
 
-具体请求体可根据 `backend/src/main/java/com/bjtu/raillinebackend/controller` 中的控制器实现继续补充。
+## Notes
+
+Detailed request and response fields can be expanded from the controller implementations in:
+
+```text
+backend/src/main/java/com/bjtu/raillinebackend/controller
+```

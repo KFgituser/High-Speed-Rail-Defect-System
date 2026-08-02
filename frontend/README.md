@@ -1,50 +1,50 @@
 # Frontend
 
-React + Vite 前端应用，提供登录、缺陷查询、病害台账、详情查看、数据导出和 2D/3D 可视化展示页面。
+React + Vite frontend application for login, defect queries, maintenance ledger views, detail inspection, data export, and 2D/3D visualization result pages.
 
-## 环境要求
+## Requirements
 
 - Node.js 18+
 - npm
 
-## 启动
+## Start The App
 
 ```bash
 npm install
 npm run dev
 ```
 
-默认访问地址：
+Default local URL:
 
 ```text
 http://localhost:5173
 ```
 
-## 配置后端地址
+## Backend API Configuration
 
-本地开发默认请求：
+The local development default is:
 
 ```text
 http://localhost:8080/api
 ```
 
-如需修改，创建 `frontend/.env.local`：
+To customize it, create `frontend/.env.local`:
 
 ```env
 VITE_API_BASE=http://localhost:8080/api
 ```
 
-## 常用命令
+## Commands
 
-| 命令 | 说明 |
+| Command | Description |
 | --- | --- |
-| `npm run dev` | 启动开发服务 |
-| `npm run build` | 构建生产版本 |
-| `npm run preview` | 预览构建结果 |
+| `npm run dev` | Starts the development server. |
+| `npm run build` | Builds the production bundle. |
+| `npm run preview` | Previews the production build locally. |
 
-## 页面模块
+## Pages
 
-- `/`: 登录页
-- `/query`: 缺陷查询与台账页面
-- `/visualization/2d`: 2D 可视化结果页面
-- `/visualization/3d`: 3D 可视化结果页面
+- `/`: Login page.
+- `/query`: Defect query and maintenance ledger page.
+- `/visualization/2d`: 2D visualization result page.
+- `/visualization/3d`: 3D visualization result page.
