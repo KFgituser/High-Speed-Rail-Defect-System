@@ -33,13 +33,3 @@ DB_USERNAME=root
 DB_PASSWORD=your_password
 ```
 
-## Demo Login Note
-
-The current demo login endpoint uses a hardcoded development account:
-
-```text
-username: admin
-password: admin123
-```
-
-The `users` table is included for schema completeness and future database-backed authentication.
