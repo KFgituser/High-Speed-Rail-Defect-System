@@ -1,66 +1,94 @@
-# High-Speed Rail Defect System
+# High-Speed Rail Defect Detection System
 
-高速铁路缺陷检测与可视化系统。项目整合了前端查询与可视化界面、后端数据服务、缺陷台账导出、2D/3D 分析结果展示等能力，适合作为完整 Web 项目的求职展示仓库。
+A full-stack web system for high-speed railway defect detection, inspection record management, and 2D/3D visualization. The project combines a React frontend, a Spring Boot backend, MySQL data storage, Excel export, and Python-based visualization scripts into one portfolio-friendly repository.
+
+![Defect validation overview](docs/screenshots/defect-validation-overview.png)
+
+## Project Highlights
+
+- Full-stack project structure with separate `frontend/` and `backend/` modules.
+- Defect query workflow based on railway line, mileage range, inspection date, severity, and defect type.
+- Side-by-side comparison between detection results and maintenance ledger records.
+- Detail modal for defect history, suggestions, and inspection metadata.
+- Excel export for detection results, ledger records, and combined datasets.
+- 2D/3D visualization workflow with generated analysis images and downloadable results.
+- Environment-variable-based backend configuration to avoid committing local passwords, script paths, or secrets.
 
 ![3D scatter result](docs/screenshots/visualization-3d-scatter.png)
 
-## 项目亮点
-
-- 前后端一体化工程结构，便于面试官快速查看完整系统实现。
-- 支持线路、里程、时间、病害类型等条件查询，并展示检测结果与病害台账。
-- 支持缺陷明细、历史记录、Excel 导出、2D/3D 可视化结果展示。
-- 后端使用 Spring Boot、Spring Security、JWT、JPA、MySQL，前端使用 React、Vite、Axios、Bootstrap。
-- 配置已改为环境变量方式，避免把数据库密码、脚本路径和密钥写死在代码中。
-
-## 仓库结构
+## Repository Structure
 
 ```text
 High-Speed-Rail-Defect-System/
-├─ backend/              # Spring Boot 后端服务
-├─ frontend/             # React + Vite 前端应用
-├─ docs/                 # 架构、接口与展示截图
-├─ deploy/               # 本地依赖服务配置
-└─ README.md             # 项目总览与启动入口
+├─ backend/              # Spring Boot backend service
+├─ frontend/             # React + Vite frontend application
+├─ docs/                 # Architecture notes, API docs, and screenshots
+├─ deploy/               # Local dependency setup
+└─ README.md             # Project overview and setup guide
 ```
 
-## 技术栈
+## Tech Stack
 
-| 层级 | 技术 |
+| Layer | Technologies |
 | --- | --- |
-| 前端 | React, Vite, Axios, React Router, i18next, Bootstrap |
-| 后端 | Java 17, Spring Boot, Spring Security, Spring Data JPA, JWT |
-| 数据库 | MySQL |
-| 可视化 | Python 脚本生成 2D/3D 缺陷分析结果，前端展示与下载 |
-| 导出 | Apache POI |
+| Frontend | React, Vite, Axios, React Router, i18next, Bootstrap |
+| Backend | Java 17, Spring Boot, Spring Security, Spring Data JPA, JWT |
+| Database | MySQL |
+| Visualization | Python scripts for 2D/3D defect analysis outputs |
+| Export | Apache POI |
 
-## 本地启动
+## Features
 
-### 1. 启动 MySQL
+- User login and JWT-based authentication
+- Railway line and defect type metadata APIs
+- Defect detection result query, filtering, sorting, and pagination
+- Maintenance ledger query, filtering, sorting, and pagination
+- Defect detail view with history and maintenance suggestion
+- Excel export for detection, ledger, and combined data
+- 2D visualization generation and result display
+- 3D scatter and amplitude visualization generation, display, and download
+- Chinese/English UI language support
+
+## Local Setup
+
+### 1. Start MySQL
 
 ```bash
 cd deploy
 docker compose up -d
 ```
 
-默认数据库为 `railline`，默认账号密码见 [deploy/docker-compose.yml](deploy/docker-compose.yml)。如果使用自己的数据库，请设置 `DB_URL`、`DB_USERNAME`、`DB_PASSWORD`。
+The default database is `railline`. The default local credentials are defined in [deploy/docker-compose.yml](deploy/docker-compose.yml).
 
-### 2. 启动后端
+For a custom database, configure:
+
+```text
+DB_URL
+DB_USERNAME
+DB_PASSWORD
+```
+
+### 2. Start the Backend
 
 ```bash
 cd backend
 ./mvnw spring-boot:run
 ```
 
-Windows 可以使用：
+On Windows:
 
 ```powershell
 cd backend
 .\mvnw.cmd spring-boot:run
 ```
 
-后端默认运行在 `http://localhost:8080`。
+The backend runs at:
 
-### 3. 启动前端
+```text
+http://localhost:8080
+```
+
+### 3. Start the Frontend
 
 ```bash
 cd frontend
@@ -68,45 +96,67 @@ npm install
 npm run dev
 ```
 
-前端默认运行在 `http://localhost:5173`，默认请求 `http://localhost:8080/api`。
+The frontend runs at:
 
-如需修改后端地址，在 `frontend/.env.local` 中配置：
+```text
+http://localhost:5173
+```
+
+By default, the frontend calls:
+
+```text
+http://localhost:8080/api
+```
+
+To change the backend API address, create `frontend/.env.local`:
 
 ```env
 VITE_API_BASE=http://localhost:8080/api
 ```
 
-## 核心功能
+## Backend Configuration
 
-- 用户登录与 JWT 认证
-- 线路、病害类型元数据查询
-- 缺陷检测结果查询、筛选、排序和分页
-- 病害台账查询、筛选、排序和分页
-- 缺陷详情查看与历史记录展示
-- 检测结果、台账和全部数据导出
-- 2D 可视化生成、轮询/流式状态更新、结果展示
-- 3D 散点图和幅值图生成、展示与下载
+The backend configuration is stored in `backend/src/main/resources/application.yml` and supports environment variables.
 
-## 文档
+Common variables:
 
-- [系统架构](docs/architecture.md)
-- [API 说明](docs/api.md)
-- [后端说明](backend/README.md)
-- [前端说明](frontend/README.md)
-
-## 展示截图
-
-| 3D 散点图 | 3D 幅值图 |
+| Variable | Description |
 | --- | --- |
-| ![3D scatter](docs/screenshots/visualization-3d-scatter.png) | ![3D amplitude](docs/screenshots/visualization-3d-amplitude.png) |
+| `SERVER_PORT` | Backend service port |
+| `DB_URL` | MySQL JDBC URL |
+| `DB_USERNAME` | MySQL username |
+| `DB_PASSWORD` | MySQL password |
+| `JWT_SECRET` | JWT signing secret |
+| `PYTHON_EXE` | Python executable path |
+| `ANALYZE_SCRIPT` | NPY analysis script path |
+| `VIZ_SCRIPT_2D` | 2D visualization script path |
+| `VIZ_SCRIPT_3D` | 3D visualization script path |
 
-## 求职展示建议
+## Documentation
 
-建议在简历中只放这个主仓库链接：
+- [System Architecture](docs/architecture.md)
+- [API Reference](docs/api.md)
+- [Backend Guide](backend/README.md)
+- [Frontend Guide](frontend/README.md)
+
+## Screenshots
+
+| Defect Validation | 3D Scatter |
+| --- | --- |
+| ![Defect validation](docs/screenshots/defect-validation-overview.png) | ![3D scatter](docs/screenshots/visualization-3d-scatter.png) |
+
+| 3D Amplitude |
+| --- |
+| ![3D amplitude](docs/screenshots/visualization-3d-amplitude.png) |
+
+## Portfolio Summary
+
+This project demonstrates full-stack engineering ability across frontend UI development, backend API design, authentication, data querying, export workflows, and visualization integration.
+
+Suggested resume entry:
 
 ```text
-高速铁路缺陷检测与可视化系统：React + Spring Boot 前后端一体化项目
+High-Speed Rail Defect Detection System
+Full-stack web system built with React, Spring Boot, MySQL, JWT authentication, Excel export, and Python-based 2D/3D visualization.
 https://github.com/KFgituser/High-Speed-Rail-Defect-System
 ```
-
-原前端、后端独立仓库可以保留，并在各自 README 顶部指向本仓库。
