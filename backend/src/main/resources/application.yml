@@ -27,6 +27,7 @@ viz:
   python: ${VIZ_PYTHON:C:/Python313/python.exe}
   script2d: ${VIZ_SCRIPT_2D:./scripts/front_side_2D.py}
   script3d: ${VIZ_SCRIPT_3D:./scripts/front_side_3D.py}
+  script3damp: ${VIZ_SCRIPT_3D_AMP:./scripts/front_side_3Damps_server.py}
   outDir: ${VIZ_OUTPUT_DIR:./output}
   workDir: ${VIZ_WORK_DIR:./runs}
 

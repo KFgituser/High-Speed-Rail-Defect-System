@@ -65,6 +65,7 @@ Common variables:
 | `ANALYZE_SCRIPT` | NPY analysis script path |
 | `VIZ_SCRIPT_2D` | 2D visualization script path |
 | `VIZ_SCRIPT_3D` | 3D visualization script path |
+| `VIZ_SCRIPT_3D_AMP` | 3D amplitude visualization script path |
 
 ## Frontend Configuration
 
@@ -80,6 +81,7 @@ For local development, create `frontend/.env.local` if the backend runs on a dif
 
 - [System Architecture](docs/architecture.md)
 - [API Reference](docs/api.md)
+- [Visualization Scripts](backend/scripts/README.md)
 - [Backend Guide](backend/README.md)
 - [Frontend Guide](frontend/README.md)
 
@@ -92,6 +94,7 @@ I independently organized the full-stack project structure, implemented the Reac
 - The visualization scripts and raw railway inspection datasets are environment-dependent and may require local path configuration before running end to end.
 - The repository includes configuration examples, but production deployment should provide real database credentials and a strong `JWT_SECRET` through environment variables.
 - Sample database initialization data is not yet included, so a fresh local setup requires preparing the MySQL schema and demo records separately.
+- Model checkpoints, raw DAS datasets, generated `.npy` files, and runtime output directories are intentionally excluded from Git because of file size and data privacy constraints.
 - The frontend build currently produces a large JavaScript bundle; code splitting can be added later to improve production loading performance.
 
 ## Screenshots

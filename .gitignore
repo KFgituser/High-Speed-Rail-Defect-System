@@ -3,6 +3,8 @@
 Thumbs.db
 .idea/
 .vscode/
+__pycache__/
+*.py[cod]
 
 # Environment and secrets
 .env
@@ -34,3 +36,13 @@ backend/data/
 
 # Large analysis artifacts
 *.npy
+*.npz
+*.pth
+*.pt
+*.ckpt
+*.onnx
+*.h5
+check_point/
+backend/scripts/check_point/
+backend/scripts/output/
+backend/scripts/runs/

@@ -33,6 +33,7 @@ On Windows:
 | `ANALYZE_SCRIPT` | `./scripts/plot_npy.py` | NPY analysis script path. |
 | `VIZ_SCRIPT_2D` | `./scripts/front_side_2D.py` | 2D visualization script path. |
 | `VIZ_SCRIPT_3D` | `./scripts/front_side_3D.py` | 3D visualization script path. |
+| `VIZ_SCRIPT_3D_AMP` | `./scripts/front_side_3Damps_server.py` | 3D amplitude visualization script path. |
 
 ## Main Modules
 
@@ -41,3 +42,4 @@ On Windows:
 - `repository`: Spring Data JPA repositories.
 - `security`: JWT authentication and request filtering.
 - `viz`: Python script execution wrapper.
+- `scripts`: Python visualization entry scripts used by the web workflow.
