@@ -14,7 +14,6 @@ A full-stack web system for high-speed railway defect detection, inspection reco
 - 2D/3D visualization workflow with generated analysis images and downloadable results.
 - Environment-variable-based backend configuration to avoid committing local passwords, script paths, or secrets.
 
-![3D scatter result](docs/screenshots/visualization-3d-scatter.png)
 
 ## Repository Structure
 
