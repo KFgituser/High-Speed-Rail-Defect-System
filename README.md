@@ -14,16 +14,15 @@ A full-stack web system for high-speed railway defect detection, inspection reco
 - 2D/3D visualization workflow with generated analysis images and downloadable results.
 - Environment-variable-based backend configuration to avoid committing local passwords, script paths, or secrets.
 
-
 ## Repository Structure
 
 ```text
 High-Speed-Rail-Defect-System/
-├─ backend/              # Spring Boot backend service
-├─ frontend/             # React + Vite frontend application
-├─ docs/                 # Architecture notes, API docs, and screenshots
-├─ deploy/               # Local dependency setup
-└─ README.md             # Project overview and setup guide
+|-- backend/              # Spring Boot backend service
+|-- frontend/             # React + Vite frontend application
+|-- docs/                 # Architecture notes, API docs, and screenshots
+|-- deploy/               # Local dependency setup
+`-- README.md             # Project overview and setup guide
 ```
 
 ## Tech Stack
@@ -67,12 +66,33 @@ Common variables:
 | `VIZ_SCRIPT_2D` | 2D visualization script path |
 | `VIZ_SCRIPT_3D` | 3D visualization script path |
 
+## Frontend Configuration
+
+The frontend reads the backend API base URL from a Vite environment variable:
+
+```env
+VITE_API_BASE=http://localhost:8080/api
+```
+
+For local development, create `frontend/.env.local` if the backend runs on a different host or port. A sample file is provided at [frontend/.env.example](frontend/.env.example).
+
 ## Documentation
 
 - [System Architecture](docs/architecture.md)
 - [API Reference](docs/api.md)
 - [Backend Guide](backend/README.md)
 - [Frontend Guide](frontend/README.md)
+
+## My Role
+
+I independently organized the full-stack project structure, implemented the React frontend workflows, connected the Spring Boot backend APIs, configured JWT-based authentication, integrated data query and export features, and connected Python-generated 2D/3D visualization outputs to the web interface.
+
+## Known Limitations
+
+- The visualization scripts and raw railway inspection datasets are environment-dependent and may require local path configuration before running end to end.
+- The repository includes configuration examples, but production deployment should provide real database credentials and a strong `JWT_SECRET` through environment variables.
+- Sample database initialization data is not yet included, so a fresh local setup requires preparing the MySQL schema and demo records separately.
+- The frontend build currently produces a large JavaScript bundle; code splitting can be added later to improve production loading performance.
 
 ## Screenshots
 
