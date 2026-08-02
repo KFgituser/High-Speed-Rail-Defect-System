@@ -25,9 +25,9 @@ spring:
 
 viz:
   python: ${VIZ_PYTHON:C:/Python313/python.exe}
-  script2d: ${VIZ_SCRIPT_2D:./scripts/front_side_2D.py}
-  script3d: ${VIZ_SCRIPT_3D:./scripts/front_side_3D.py}
-  script3damp: ${VIZ_SCRIPT_3D_AMP:./scripts/front_side_3Damps_server.py}
+  script2d: ${VIZ_SCRIPT_2D:../python-analysis/scripts/front_side_2D.py}
+  script3d: ${VIZ_SCRIPT_3D:../python-analysis/scripts/front_side_3D.py}
+  script3damp: ${VIZ_SCRIPT_3D_AMP:../python-analysis/scripts/front_side_3Damps_server.py}
   outDir: ${VIZ_OUTPUT_DIR:./output}
   workDir: ${VIZ_WORK_DIR:./runs}
 
@@ -38,7 +38,7 @@ app:
     plotsDir: ${PLOTS_DIR:./runs/plots}
   python:
     exe: ${PYTHON_EXE:C:/Python313/python.exe}
-    script: ${ANALYZE_SCRIPT:./scripts/plot_npy.py}
+    script: ${ANALYZE_SCRIPT:../python-analysis/scripts/plot_npy.py}
   jwt:
     secret: ${JWT_SECRET:change-me-to-a-long-random-secret-at-least-32-bytes}
     expire-minutes: ${JWT_EXPIRE_MINUTES:120}

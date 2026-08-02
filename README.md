@@ -20,6 +20,7 @@ A full-stack web system for high-speed railway defect detection, inspection reco
 High-Speed-Rail-Defect-System/
 |-- backend/              # Spring Boot backend service
 |-- frontend/             # React + Vite frontend application
+|-- python-analysis/      # Python DAS analysis and visualization scripts
 |-- docs/                 # Architecture notes, API docs, and screenshots
 |-- deploy/               # Local dependency setup
 `-- README.md             # Project overview and setup guide
@@ -81,7 +82,7 @@ For local development, create `frontend/.env.local` if the backend runs on a dif
 
 - [System Architecture](docs/architecture.md)
 - [API Reference](docs/api.md)
-- [Visualization Scripts](backend/scripts/README.md)
+- [Python Analysis Scripts](python-analysis/README.md)
 - [Backend Guide](backend/README.md)
 - [Frontend Guide](frontend/README.md)
 

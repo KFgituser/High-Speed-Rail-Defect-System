@@ -30,10 +30,10 @@ On Windows:
 | `DB_PASSWORD` | Empty | Database password. |
 | `JWT_SECRET` | Example value | JWT signing secret. Replace it before deployment. |
 | `PYTHON_EXE` | `C:/Python313/python.exe` | Python executable path. |
-| `ANALYZE_SCRIPT` | `./scripts/plot_npy.py` | NPY analysis script path. |
-| `VIZ_SCRIPT_2D` | `./scripts/front_side_2D.py` | 2D visualization script path. |
-| `VIZ_SCRIPT_3D` | `./scripts/front_side_3D.py` | 3D visualization script path. |
-| `VIZ_SCRIPT_3D_AMP` | `./scripts/front_side_3Damps_server.py` | 3D amplitude visualization script path. |
+| `ANALYZE_SCRIPT` | `../python-analysis/scripts/plot_npy.py` | NPY analysis script path. |
+| `VIZ_SCRIPT_2D` | `../python-analysis/scripts/front_side_2D.py` | 2D visualization script path. |
+| `VIZ_SCRIPT_3D` | `../python-analysis/scripts/front_side_3D.py` | 3D visualization script path. |
+| `VIZ_SCRIPT_3D_AMP` | `../python-analysis/scripts/front_side_3Damps_server.py` | 3D amplitude visualization script path. |
 
 ## Main Modules
 
@@ -42,4 +42,4 @@ On Windows:
 - `repository`: Spring Data JPA repositories.
 - `security`: JWT authentication and request filtering.
 - `viz`: Python script execution wrapper.
-- `scripts`: Python visualization entry scripts used by the web workflow.
+The Python analysis and visualization scripts are kept in the top-level `python-analysis/` module and are referenced by backend configuration.

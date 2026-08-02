@@ -43,6 +43,9 @@ backend/data/
 *.onnx
 *.h5
 check_point/
-backend/scripts/check_point/
-backend/scripts/output/
-backend/scripts/runs/
+python-analysis/scripts/check_point/
+python-analysis/scripts/output/
+python-analysis/scripts/runs/
+python-analysis/data/
+python-analysis/output/
+python-analysis/runs/

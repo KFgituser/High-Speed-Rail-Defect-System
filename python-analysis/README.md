@@ -1,6 +1,6 @@
-# Visualization Scripts
+# Python Analysis
 
-This directory contains the Python entry scripts that are called by the web system's visualization workflow. Large model checkpoints, raw DAS datasets, generated `.npy` files, and runtime output folders are intentionally excluded from Git.
+This module contains the Python entry scripts and lightweight source dependencies used by the web system's DAS analysis and visualization workflow. Large model checkpoints, raw DAS datasets, generated `.npy` files, and runtime output folders are intentionally excluded from Git.
 
 ## Script Mapping
 
@@ -15,9 +15,9 @@ This directory contains the Python entry scripts that are called by the web syst
 The backend reads script paths from `backend/src/main/resources/application.yml`.
 
 ```env
-VIZ_SCRIPT_2D=./scripts/front_side_2D.py
-VIZ_SCRIPT_3D=./scripts/front_side_3D.py
-VIZ_SCRIPT_3D_AMP=./scripts/front_side_3Damps_server.py
+VIZ_SCRIPT_2D=../python-analysis/scripts/front_side_2D.py
+VIZ_SCRIPT_3D=../python-analysis/scripts/front_side_3D.py
+VIZ_SCRIPT_3D_AMP=../python-analysis/scripts/front_side_3Damps_server.py
 VIZ_OUTPUT_DIR=./output
 VIZ_WORK_DIR=./runs
 VIZ_NPY_DIR=./data
@@ -47,7 +47,7 @@ pip install -r requirements.txt
 
 A full local run may still require environment-specific artifacts:
 
-- model checkpoints under `backend/scripts/check_point/`
+- model checkpoints under `python-analysis/scripts/check_point/`
 - raw DAS `.npy` data files
 - generated intermediate files such as `amps_stack.npy`, `x_labels.npy`, and `total_time_seconds.npy`
 
