@@ -279,7 +279,7 @@ def plot_surface_with_defects(
             # 只在底部平面画“圆点”
             ax.scatter(
                 x, y, z_base,
-                s=defect_size,  # 继承你原来的大小
+                s=defect_size,  # 继承原来的大小
                 c=color,
                 alpha=0.9,  # 稍微高一点更清晰
                 marker='o',  # 圆点
