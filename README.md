@@ -2,7 +2,7 @@
 
 A full-stack web system for high-speed railway defect detection, inspection record management, and 2D/3D visualization. The project combines a React frontend, a Spring Boot backend, MySQL data storage, Excel export, and Python-based visualization scripts into one portfolio-friendly repository.
 
-![Defect validation overview](docs/screenshots/defect-validation-overview.png)
+![Login screen](docs/screenshots/login-screen.png)
 
 ## Project Highlights
 
