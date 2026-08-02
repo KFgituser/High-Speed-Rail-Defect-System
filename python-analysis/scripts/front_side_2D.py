@@ -398,12 +398,12 @@ def demo_show(
         return str(s)
 
     def _km_label_from_meters(m):
-        """如果你拿到的是数值(单位:米)，转成 Kxxx+yyy 字符串。"""
+        """如果拿到的是数值(单位:米)，转成 Kxxx+yyy 字符串。"""
         m = int(round(float(m)))
         km, mm = divmod(m, 1000)
         return f"K{km}+{mm:03d}"
 
-    # 方式1：如果你保存了 x_labels_saved（推荐）
+    # 方式1：如果保存了 x_labels_saved（推荐）
     try:
         left_label = _km_label_from_text(x_labels_saved[0])
         right_label = _km_label_from_text(x_labels_saved[-1])
