@@ -21,6 +21,7 @@ High-Speed-Rail-Defect-System/
 |-- backend/              # Spring Boot backend service
 |-- frontend/             # React + Vite frontend application
 |-- python-analysis/      # Python DAS analysis and visualization scripts
+|-- database/             # MySQL schema and demo seed data
 |-- docs/                 # Architecture notes, API docs, and screenshots
 |-- deploy/               # Local dependency setup
 `-- README.md             # Project overview and setup guide
@@ -83,6 +84,7 @@ For local development, create `frontend/.env.local` if the backend runs on a dif
 - [System Architecture](docs/architecture.md)
 - [API Reference](docs/api.md)
 - [Python Analysis Scripts](python-analysis/README.md)
+- [Database Setup](database/README.md)
 - [Backend Guide](backend/README.md)
 - [Frontend Guide](frontend/README.md)
 
@@ -96,7 +98,7 @@ My responsibilities included structuring the repository, building the React fron
 
 - The visualization scripts and raw railway inspection datasets are environment-dependent and may require local path configuration before running end to end.
 - The repository includes configuration examples, but production deployment should provide real database credentials and a strong `JWT_SECRET` through environment variables.
-- Sample database initialization data is not yet included, so a fresh local setup requires preparing the MySQL schema and demo records separately.
+- Demo database schema and seed data are included for portfolio review, but production data and raw DAS datasets are intentionally excluded.
 - Model checkpoints, raw DAS datasets, generated `.npy` files, and runtime output directories are intentionally excluded from Git because of file size and data privacy constraints.
 - The frontend build currently produces a large JavaScript bundle; code splitting can be added later to improve production loading performance.
 

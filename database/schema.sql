@@ -1,0 +1,104 @@
+CREATE DATABASE IF NOT EXISTS railline
+  DEFAULT CHARACTER SET utf8mb4
+  DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE railline;
+
+CREATE TABLE IF NOT EXISTS rail_line (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  code VARCHAR(50) UNIQUE,
+  name VARCHAR(100) NOT NULL,
+  km_min INT NOT NULL,
+  km_max INT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS disease_type (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  code VARCHAR(100) UNIQUE,
+  name VARCHAR(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS detection (
+  id VARCHAR(20) PRIMARY KEY,
+  line_name VARCHAR(100) NOT NULL,
+  location VARCHAR(50) NOT NULL,
+  type_name VARCHAR(100) NOT NULL,
+  detect_date DATE NOT NULL,
+  severity VARCHAR(50) NOT NULL,
+  description TEXT,
+  inspector VARCHAR(50),
+  suggestion TEXT,
+  history JSON
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS ledger (
+  id VARCHAR(20) PRIMARY KEY,
+  line_name VARCHAR(100) NOT NULL,
+  location VARCHAR(50) NOT NULL,
+  type_name VARCHAR(100) NOT NULL,
+  record_date DATE NOT NULL,
+  severity VARCHAR(50) NOT NULL,
+  description TEXT,
+  recorder VARCHAR(50),
+  suggestion TEXT,
+  history JSON
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS users (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  role VARCHAR(50) NOT NULL DEFAULT 'ADMIN',
+  phone VARCHAR(50)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS viz_slots (
+  slot_id INT PRIMARY KEY,
+  run_id VARCHAR(64),
+  image_path VARCHAR(255),
+  date_str VARCHAR(50),
+  start_label VARCHAR(50),
+  end_label VARCHAR(50),
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS analysis_result (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  slot_id INT NOT NULL,
+  metrics_json JSON NOT NULL,
+  analyzed_at DATETIME NOT NULL,
+  run_id VARCHAR(64),
+  INDEX idx_slot_time (slot_id, analyzed_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS viz_run (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  run_uuid CHAR(36) NOT NULL UNIQUE,
+  line_name VARCHAR(64),
+  start_abs_m INT,
+  end_abs_m INT,
+  year_start INT,
+  year_end INT,
+  month INT,
+  day INT,
+  status VARCHAR(32) NOT NULL DEFAULT 'PENDING',
+  progress INT NOT NULL DEFAULT 0,
+  err_msg TEXT,
+  out_dir VARCHAR(255) NOT NULL,
+  result_2d_url VARCHAR(255),
+  result_3d_url VARCHAR(255),
+  defects_url VARCHAR(255),
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS viz_defect (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  run_uuid CHAR(36) NOT NULL,
+  time_s DECIMAL(7,3) NOT NULL,
+  mileage_km DECIMAL(8,3) NOT NULL,
+  cls VARCHAR(50) NOT NULL,
+  INDEX idx_run_uuid (run_uuid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
