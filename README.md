@@ -87,7 +87,9 @@ For local development, create `frontend/.env.local` if the backend runs on a dif
 
 ## My Role
 
-I independently organized the full-stack project structure, implemented the React frontend workflows, connected the Spring Boot backend APIs, configured JWT-based authentication, integrated data query and export features, and connected Python-generated 2D/3D visualization outputs to the web interface.
+The defect detection logic and DAS-based analysis scripts were derived from doctoral research work at Beijing Jiaotong University. Based on these research outputs, I developed a full-stack web system to make the detection results queryable, visualizable, and easier to demonstrate.
+
+My responsibilities included structuring the repository, building the React frontend, connecting Spring Boot APIs, integrating Python-based 2D/3D visualization scripts, configuring the query and export workflows, and presenting railway defect detection results through an interactive web interface.
 
 ## Known Limitations
 
