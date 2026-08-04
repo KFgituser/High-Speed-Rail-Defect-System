@@ -104,13 +104,13 @@ My responsibilities included structuring the repository, building the React fron
 
 ## Screenshots
 
-| Defect Validation | 3D Scatter |
+| 3D Amplitude | 3D Scatter |
 | --- | --- |
-| ![Defect validation](docs/screenshots/defect-validation-overview.png) | ![3D scatter](docs/screenshots/visualization-3d-scatter.png) |
+| ![3D amplitude](docs/screenshots/visualization-3d-amplitude.png)  | ![3D scatter](docs/screenshots/visualization-3d-scatter.png) |
 
-| 3D Amplitude |
+| Defect Validation |
 | --- |
-| ![3D amplitude](docs/screenshots/visualization-3d-amplitude.png) |
+| ![Defect validation](docs/screenshots/defect-validation-overview.png)|
 
 ## Portfolio Summary
 
