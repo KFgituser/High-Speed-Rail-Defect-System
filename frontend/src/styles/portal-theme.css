@@ -1,0 +1,411 @@
+/* Shared dark cockpit theme for Query, 2D and 3D pages. */
+.portal-app {
+  --portal-panel: rgba(5, 25, 55, 0.94);
+  --portal-panel-soft: rgba(7, 32, 68, 0.82);
+  --portal-border: rgba(45, 111, 185, 0.58);
+  --portal-border-soft: rgba(53, 114, 183, 0.28);
+  --portal-text: #eaf4ff;
+  --portal-muted: #8fa5c2;
+  --portal-cyan: #08dce6;
+  --portal-blue: #2386ff;
+}
+
+.portal-app,
+.portal-app * { box-sizing: border-box; }
+
+.portal-app .main-content,
+.portal-app .visualization-content {
+  width: 100%;
+  padding: 12px;
+  color: var(--portal-text);
+  background: transparent;
+}
+
+.portal-app .main-content { overflow: visible; }
+
+.portal-app .query-section,
+.portal-app .result-section,
+.portal-app .visualization-header,
+.portal-app .defect-info,
+.portal-app .visualization-section,
+.portal-app .analysis-section,
+.portal-app .filter-section,
+.portal-app .file-compare-card {
+  border: 1px solid var(--portal-border);
+  border-radius: 7px;
+  color: var(--portal-text);
+  background: linear-gradient(135deg, rgba(7, 32, 68, 0.9), rgba(2, 17, 39, 0.95));
+  box-shadow: inset 0 0 24px rgba(5, 39, 84, 0.2), 0 5px 16px rgba(0, 0, 0, 0.18);
+}
+
+.portal-app .query-section,
+.portal-app .result-section { margin-bottom: 12px; padding: 18px; }
+
+.portal-app .visualization-header {
+  min-height: 62px;
+  margin: 12px 12px 0;
+  padding: 10px 16px;
+}
+
+.portal-app .visualization-header h1,
+.portal-app .visualization-header h2,
+.portal-app .visualization-section h2,
+.portal-app .visualization-section h3,
+.portal-app .analysis-section h2,
+.portal-app .section-title h3,
+.portal-app .view-header h3 {
+  color: #f2f8ff;
+  text-shadow: 0 0 10px rgba(40, 147, 255, 0.1);
+}
+
+.portal-app .visualization-header h1,
+.portal-app .visualization-header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.portal-app .visualization-section,
+.portal-app .analysis-section { margin: 12px; padding: 18px; }
+.portal-app .visualization-content .visualization-section,
+.portal-app .visualization-content .analysis-section { margin: 0; }
+.portal-app .visualization-content { gap: 12px; }
+
+.portal-app .section-title,
+.portal-app .section-header {
+  margin-bottom: 15px;
+  padding-bottom: 11px;
+  border-bottom-color: var(--portal-border-soft);
+}
+
+.portal-app .section-title h4,
+.portal-app .section-header h4 {
+  color: #edf6ff;
+  font-size: 21px;
+}
+
+.portal-app .table-container h4,
+.portal-app .table-head h4 {
+  color: #dceaff;
+  font-size: 17px;
+}
+
+.portal-app .form-group label,
+.portal-app .filter-group label,
+.portal-app .info-item label,
+.portal-app .analysis-item label,
+.portal-app .checkbox-label {
+  color: #b7c9de;
+}
+
+.portal-app .form-input,
+.portal-app .mini-select,
+.portal-app .input.search,
+.portal-app .pager-jump input,
+.portal-app select,
+.portal-app input[type='text'],
+.portal-app input[type='date'],
+.portal-app input[type='number'] {
+  border: 1px solid rgba(57, 119, 188, 0.62);
+  color: #dcecff;
+  background: rgba(3, 18, 42, 0.88);
+  box-shadow: inset 0 0 10px rgba(12, 73, 145, 0.12);
+}
+
+.portal-app .form-input:focus,
+.portal-app .mini-select:focus,
+.portal-app .input.search:focus {
+  outline: none;
+  border-color: #168df4;
+  box-shadow: 0 0 0 2px rgba(22, 141, 244, 0.15), 0 0 13px rgba(14, 120, 218, 0.12);
+}
+
+.portal-app select option { color: #dcecff; background: #071b36; }
+.portal-app input[type='checkbox'] { accent-color: #168cf5; }
+.portal-app input[type='date']::-webkit-calendar-picker-indicator { filter: invert(0.85) sepia(1) saturate(2) hue-rotate(175deg); }
+
+.portal-app .range-separator,
+.portal-app .date-separator,
+.portal-app .k-prefix,
+.portal-app .k-plus,
+.portal-app .hint,
+.portal-app .empty { color: var(--portal-muted); }
+
+.portal-app .query-range-slider,
+.portal-app .range-slider-container {
+  border: 1px solid rgba(46, 105, 174, 0.48);
+  background: rgba(3, 19, 43, 0.7);
+}
+
+.portal-app .slider-header,
+.portal-app .slider-values-display,
+.portal-app .slider-values-display span { color: #aabdd3; }
+.portal-app .slider-values-display span { color: #d9eaff; }
+.portal-app .slider-track { background: linear-gradient(90deg, #1679f0, #0edbe3); box-shadow: 0 0 8px rgba(12, 194, 224, 0.25); }
+.portal-app .slider-handle { border-color: #16b9ee; background: #e8f7ff; box-shadow: 0 0 9px rgba(15, 182, 237, 0.45); }
+.portal-app .slider-tick { background: #315a86; }
+.portal-app .slider-tick.major { background: #688cb4; }
+.portal-app .slider-tick-label { color: #7891ad; }
+
+.portal-app .btn-primary,
+.portal-app .back-btn,
+.portal-app .btn-to-3d,
+.portal-app .btn-generate-amp {
+  border: 1px solid rgba(48, 153, 255, 0.5);
+  color: #fff;
+  background: linear-gradient(180deg, #178df4, #0a5fc3);
+  box-shadow: 0 0 10px rgba(19, 124, 226, 0.2);
+}
+
+.portal-app .btn-primary:hover,
+.portal-app .back-btn:hover,
+.portal-app .btn-to-3d:hover,
+.portal-app .btn-generate-amp:hover { filter: brightness(1.12); }
+
+.portal-app .btn-secondary,
+.portal-app .pager-btn {
+  border: 1px solid rgba(66, 123, 185, 0.55);
+  color: #bbcee2;
+  background: rgba(9, 35, 70, 0.88);
+}
+
+.portal-app .btn-secondary:hover,
+.portal-app .pager-btn:hover { color: #fff; background: rgba(19, 78, 144, 0.8); }
+.portal-app .pager-btn.active { color: #fff; border-color: #1599ff; background: #0c61b8; box-shadow: 0 0 0 2px rgba(21, 153, 255, 0.12); }
+.portal-app .pager-info,
+.portal-app .pagination-bar { color: var(--portal-muted); }
+
+.portal-app .btn-export,
+.portal-app .btn-download,
+.portal-app .btn-download-all,
+.portal-app .btn-export-analysis {
+  border: 1px solid rgba(9, 202, 191, 0.5);
+  color: #eaffff;
+  background: linear-gradient(180deg, #0aa9ac, #08757e);
+}
+
+.portal-app .btn-export:hover,
+.portal-app .btn-download:hover,
+.portal-app .btn-download-all:hover,
+.portal-app .btn-export-analysis:hover { background: linear-gradient(180deg, #0bc1c3, #078792); }
+
+.portal-app .table-wrapper,
+.portal-app .analysis-table,
+.portal-app .file-list {
+  border: 1px solid rgba(49, 105, 168, 0.48);
+  background: rgba(2, 17, 39, 0.68);
+  scrollbar-color: #155a9d #04142d;
+}
+
+.portal-app .data-table,
+.portal-app .analysis-table table { color: #b9cbe0; }
+
+.portal-app .data-table th,
+.portal-app .analysis-table th {
+  border-bottom-color: rgba(54, 105, 162, 0.52);
+  color: #a9bfd7;
+  background: #08264b;
+}
+
+.portal-app .data-table td,
+.portal-app .analysis-table td { border-bottom-color: rgba(48, 94, 148, 0.3); }
+.portal-app .data-table tr:hover,
+.portal-app .analysis-table tr:hover,
+.portal-app th.sortable:hover { background: rgba(18, 76, 142, 0.25); }
+
+.portal-app .table-filters { flex-wrap: wrap; }
+.portal-app .mini-select { font-size: 13px; }
+.portal-app .badge-danger { background: #d92738; }
+.portal-app .badge-warning { color: #201400; background: #f5a514; }
+.portal-app .badge-success { background: #0b9d87; }
+.portal-app .btn-detail { border: 1px solid #1789ed; color: #eaf6ff; background: #0a5eae; }
+
+.portal-app .file-compare-card { margin-top: 0; padding: 18px; }
+.portal-app .file-list { padding: 8px; }
+.portal-app .file-row { color: #c8d9ea; }
+.portal-app .file-row:hover { background: rgba(17, 80, 153, 0.28); }
+.portal-app .file-row.active { border: 1px solid rgba(30, 145, 247, 0.68); background: rgba(18, 100, 191, 0.34); }
+.portal-app .file-row .fname { color: #e9f4ff; }
+.portal-app .file-row .meta { color: #7891ad; }
+
+.portal-app .view-container {
+  border: 1px solid rgba(50, 110, 178, 0.5);
+  color: #c7d8e9;
+  background: rgba(3, 20, 45, 0.72);
+  box-shadow: inset 0 0 18px rgba(10, 63, 124, 0.1);
+}
+
+.portal-app .image-container { color: #b9cce1; }
+.portal-app .image-info { border: 1px solid rgba(47, 97, 154, 0.34); color: #9db2ca; background: rgba(5, 29, 60, 0.86); }
+.portal-app .image-info p { font-size: 14px; }
+.portal-app .image-info strong { color: #d7e7f8; }
+.portal-app .visualization-image { border: 1px solid rgba(50, 104, 166, 0.28); box-shadow: 0 3px 14px rgba(0, 0, 0, 0.35); }
+.portal-app .scatter-image-frame { border: 1px solid rgba(50, 104, 166, 0.36); background: rgba(3, 17, 38, 0.82); box-shadow: inset 0 0 20px rgba(6, 56, 112, 0.12); }
+.portal-app .image-placeholder { border-color: rgba(76, 130, 191, 0.56); color: #7893af; background: rgba(3, 19, 42, 0.66); }
+.portal-app .image-placeholder.loading { border-color: #168ef0; color: #5bb5ff; background: rgba(11, 70, 132, 0.28); }
+
+.portal-app .dialog-mask,
+.portal-app .gt-modal-mask { background: rgba(0, 7, 18, 0.78); backdrop-filter: blur(3px); }
+.portal-app .dialog,
+.portal-app .gt-modal {
+  border: 1px solid rgba(53, 123, 200, 0.68);
+  color: #dcecff;
+  background: linear-gradient(145deg, #08244a, #04142d 70%);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.58);
+}
+.portal-app .dialog-header { border-bottom: 1px solid rgba(58, 117, 183, 0.32); }
+.portal-app .dialog-footer { border-top-color: rgba(58, 117, 183, 0.3); }
+.portal-app .progress { background: rgba(20, 62, 111, 0.5); }
+.portal-app .progress__bar { background: linear-gradient(90deg, #167bf0, #0edbe3); }
+
+.portal-app .modal-content {
+  border: 1px solid rgba(53, 123, 200, 0.7);
+  color: #c8d9eb;
+  background: linear-gradient(145deg, #08244a, #04142d 70%);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.58);
+}
+
+.portal-app .modal-header { border-bottom: 1px solid rgba(58, 117, 183, 0.34); background: linear-gradient(90deg, #0a4f9c, #07366d); }
+.portal-app .modal-footer { border-top-color: rgba(58, 117, 183, 0.34); }
+.portal-app .detail-section h5 { color: #dcecff; border-bottom-color: rgba(58, 117, 183, 0.3); }
+.portal-app .photo-placeholder { border-color: rgba(64, 124, 191, 0.52); color: #8298b0; background: rgba(3, 19, 42, 0.68); }
+.portal-app .photo-placeholder:hover { background: rgba(14, 62, 119, 0.48); }
+.portal-app .history-item { border-bottom-color: rgba(55, 101, 155, 0.26); }
+
+.portal-app .chip-running { color: #ffd272; border-color: #aa7416; background: rgba(126, 82, 5, 0.24); }
+.portal-app .chip-success { color: #66e1b0; border-color: #18865d; background: rgba(13, 105, 68, 0.25); }
+.portal-app .chip-error { color: #ff7c84; border-color: #a02f38; background: rgba(125, 24, 34, 0.24); }
+
+@media (max-width: 1200px) {
+  .portal-app .comparison-tables,
+  .portal-app .visualization-grid { grid-template-columns: 1fr; }
+  .portal-app .export-actions { flex-wrap: wrap; }
+}
+
+@media (max-width: 768px) {
+  .portal-app .visualization-header { align-items: flex-start; gap: 10px; }
+  .portal-app .visualization-header h1,
+  .portal-app .visualization-header h2 { font-size: 18px; }
+}
+
+/* Light system theme for Query, 2D and 3D pages. */
+html[data-theme='light'] .portal-app {
+  --portal-panel: rgba(255, 255, 255, 0.97);
+  --portal-panel-soft: rgba(242, 247, 251, 0.96);
+  --portal-border: rgba(88, 132, 164, 0.42);
+  --portal-border-soft: rgba(91, 132, 161, 0.2);
+  --portal-text: #18334e;
+  --portal-muted: #637d94;
+  --portal-cyan: #0b9275;
+  --portal-blue: #247fbc;
+}
+
+html[data-theme='light'] .portal-app .main-content,
+html[data-theme='light'] .portal-app .visualization-content,
+html[data-theme='light'] .portal-app .visualization-page { color: var(--portal-text); background: transparent; }
+
+html[data-theme='light'] .portal-app .query-section,
+html[data-theme='light'] .portal-app .result-section,
+html[data-theme='light'] .portal-app .visualization-header,
+html[data-theme='light'] .portal-app .defect-info,
+html[data-theme='light'] .portal-app .visualization-section,
+html[data-theme='light'] .portal-app .analysis-section,
+html[data-theme='light'] .portal-app .filter-section,
+html[data-theme='light'] .portal-app .file-compare-card {
+  color: var(--portal-text);
+  border-color: var(--portal-border);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.99), rgba(241, 247, 251, 0.97));
+  box-shadow: inset 0 0 22px rgba(78, 139, 179, 0.05), 0 5px 16px rgba(31, 68, 94, 0.09);
+}
+
+html[data-theme='light'] .portal-app .visualization-header h1,
+html[data-theme='light'] .portal-app .visualization-header h2,
+html[data-theme='light'] .portal-app .visualization-section h2,
+html[data-theme='light'] .portal-app .visualization-section h3,
+html[data-theme='light'] .portal-app .analysis-section h2,
+html[data-theme='light'] .portal-app .section-title h3,
+html[data-theme='light'] .portal-app .view-header h3,
+html[data-theme='light'] .portal-app .section-title h4,
+html[data-theme='light'] .portal-app .section-header h4,
+html[data-theme='light'] .portal-app .table-container h4,
+html[data-theme='light'] .portal-app .table-head h4 { color: #173650; text-shadow: none; }
+
+html[data-theme='light'] .portal-app .section-title,
+html[data-theme='light'] .portal-app .section-header { border-bottom-color: var(--portal-border-soft); }
+html[data-theme='light'] .portal-app .form-group label,
+html[data-theme='light'] .portal-app .filter-group label,
+html[data-theme='light'] .portal-app .info-item label,
+html[data-theme='light'] .portal-app .analysis-item label,
+html[data-theme='light'] .portal-app .checkbox-label { color: #3d5a72; }
+
+html[data-theme='light'] .portal-app .form-input,
+html[data-theme='light'] .portal-app .mini-select,
+html[data-theme='light'] .portal-app .input.search,
+html[data-theme='light'] .portal-app .pager-jump input,
+html[data-theme='light'] .portal-app select,
+html[data-theme='light'] .portal-app input[type='text'],
+html[data-theme='light'] .portal-app input[type='date'],
+html[data-theme='light'] .portal-app input[type='number'] {
+  color: #28475f;
+  border-color: rgba(82, 130, 165, 0.46);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: inset 0 0 8px rgba(43, 105, 148, 0.05);
+}
+
+html[data-theme='light'] .portal-app select option { color: #28475f; background: #fff; }
+html[data-theme='light'] .portal-app input[type='date']::-webkit-calendar-picker-indicator { filter: none; }
+html[data-theme='light'] .portal-app .query-range-slider,
+html[data-theme='light'] .portal-app .range-slider-container { border-color: rgba(79, 127, 162, 0.35); background: rgba(232, 241, 247, 0.72); }
+html[data-theme='light'] .portal-app .slider-header,
+html[data-theme='light'] .portal-app .slider-values-display,
+html[data-theme='light'] .portal-app .slider-values-display span { color: #47647c; }
+html[data-theme='light'] .portal-app .slider-tick { background: #abc0cf; }
+html[data-theme='light'] .portal-app .slider-tick.major { background: #66879f; }
+html[data-theme='light'] .portal-app .slider-tick-label { color: #647f95; }
+
+html[data-theme='light'] .portal-app .btn-secondary,
+html[data-theme='light'] .portal-app .pager-btn { color: #426078; border-color: rgba(75, 123, 158, 0.4); background: rgba(247, 251, 253, 0.96); }
+html[data-theme='light'] .portal-app .btn-secondary:hover,
+html[data-theme='light'] .portal-app .pager-btn:hover { color: #123a59; background: #e5f0f6; }
+html[data-theme='light'] .portal-app .pager-btn.active { color: #fff; border-color: #2584bd; background: #247eaf; }
+html[data-theme='light'] .portal-app .pager-info,
+html[data-theme='light'] .portal-app .pagination-bar { color: #607a91; }
+
+html[data-theme='light'] .portal-app .table-wrapper,
+html[data-theme='light'] .portal-app .analysis-table,
+html[data-theme='light'] .portal-app .file-list { border-color: rgba(80, 126, 159, 0.36); background: rgba(255, 255, 255, 0.78); scrollbar-color: #8fb4cc #e9f1f6; }
+html[data-theme='light'] .portal-app .data-table,
+html[data-theme='light'] .portal-app .analysis-table table { color: #36536a; }
+html[data-theme='light'] .portal-app .data-table th,
+html[data-theme='light'] .portal-app .analysis-table th { color: #3d5a72; border-bottom-color: rgba(80, 124, 155, 0.32); background: #dfeaf1; }
+html[data-theme='light'] .portal-app .data-table td,
+html[data-theme='light'] .portal-app .analysis-table td { border-bottom-color: rgba(85, 126, 155, 0.22); }
+html[data-theme='light'] .portal-app .data-table tr:hover,
+html[data-theme='light'] .portal-app .analysis-table tr:hover,
+html[data-theme='light'] .portal-app th.sortable:hover { background: rgba(53, 135, 185, 0.1); }
+
+html[data-theme='light'] .portal-app .file-row { color: #3d5a72; }
+html[data-theme='light'] .portal-app .file-row:hover { background: rgba(53, 135, 185, 0.09); }
+html[data-theme='light'] .portal-app .file-row.active { border-color: rgba(31, 131, 190, 0.48); background: rgba(42, 141, 197, 0.13); }
+html[data-theme='light'] .portal-app .file-row .fname { color: #173650; }
+html[data-theme='light'] .portal-app .file-row .meta { color: #667f94; }
+html[data-theme='light'] .portal-app .view-container { color: #36536a; border-color: rgba(80, 126, 159, 0.36); background: rgba(250, 253, 255, 0.86); box-shadow: inset 0 0 16px rgba(48, 113, 158, 0.05); }
+html[data-theme='light'] .portal-app .image-container { color: #3f5d74; }
+html[data-theme='light'] .portal-app .image-info { color: #59738a; border-color: rgba(78, 123, 155, 0.28); background: rgba(231, 240, 246, 0.78); }
+html[data-theme='light'] .portal-app .image-info strong { color: #21415a; }
+html[data-theme='light'] .portal-app .scatter-image-frame { border-color: rgba(78, 123, 155, 0.3); background: rgba(248, 252, 254, 0.92); box-shadow: inset 0 0 18px rgba(51, 112, 153, 0.05); }
+html[data-theme='light'] .portal-app .image-placeholder { color: #668096; border-color: rgba(83, 130, 164, 0.45); background: rgba(238, 245, 249, 0.76); }
+
+html[data-theme='light'] .portal-app .dialog-mask,
+html[data-theme='light'] .portal-app .gt-modal-mask { background: rgba(40, 59, 73, 0.4); }
+html[data-theme='light'] .portal-app .dialog,
+html[data-theme='light'] .portal-app .gt-modal,
+html[data-theme='light'] .portal-app .modal-content { color: #28475f; border-color: rgba(67, 123, 165, 0.5); background: linear-gradient(145deg, #fff, #eef5f9 70%); box-shadow: 0 20px 60px rgba(35, 65, 87, 0.24); }
+html[data-theme='light'] .portal-app .dialog-header,
+html[data-theme='light'] .portal-app .dialog-footer,
+html[data-theme='light'] .portal-app .modal-footer { border-color: rgba(79, 125, 157, 0.28); }
+html[data-theme='light'] .portal-app .modal-header { border-bottom-color: rgba(64, 118, 156, 0.36); background: linear-gradient(90deg, #2e87b9, #256b98); }
+html[data-theme='light'] .portal-app .detail-section h5 { color: #21415a; border-bottom-color: rgba(79, 125, 157, 0.25); }
+html[data-theme='light'] .portal-app .photo-placeholder { color: #637d92; border-color: rgba(80, 127, 161, 0.42); background: #eef4f8; }
+html[data-theme='light'] .portal-app .photo-placeholder:hover { background: #e2edf3; }
+html[data-theme='light'] .portal-app .history-item { border-bottom-color: rgba(80, 124, 155, 0.2); }

@@ -1,50 +1,55 @@
-# Frontend
+# High-Speed Rail Defect Frontend
 
-React + Vite frontend application for login, defect queries, maintenance ledger views, detail inspection, data export, and 2D/3D visualization result pages.
+React frontend for a high-speed rail defect detection and visualization system.
 
-## Requirements
+This interface brings login, multilingual navigation, defect query workflows, and 2D/3D visualization pages into one portfolio-friendly repository.
 
-- Node.js 18+
-- npm
+![Login screen](./docs/login-screen.png)
 
-## Start The App
+## Features
+
+- React + Vite frontend
+- Chinese and English language switching
+- Login page with remembered account support
+- Defect query, detail, and export workflows
+- 2D and 3D visualization pages connected to the backend API
+
+## Getting Started
+
+Install dependencies:
 
 ```bash
 npm install
-npm run dev
 ```
 
-Default local URL:
+Start the development server:
+
+```bash
+npm start
+```
+
+Open:
 
 ```text
-http://localhost:5173
+http://localhost:3000/
 ```
 
-## Backend API Configuration
+Build for production:
 
-The local development default is:
+```bash
+npm run build
+```
+
+## Backend API
+
+By default, the frontend connects to:
 
 ```text
 http://localhost:8080/api
 ```
 
-To customize it, create `frontend/.env.local`:
+You can override it with:
 
 ```env
 VITE_API_BASE=http://localhost:8080/api
 ```
-
-## Commands
-
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Starts the development server. |
-| `npm run build` | Builds the production bundle. |
-| `npm run preview` | Previews the production build locally. |
-
-## Pages
-
-- `/`: Login page.
-- `/query`: Defect query and maintenance ledger page.
-- `/visualization/2d`: 2D visualization result page.
-- `/visualization/3d`: 3D visualization result page.

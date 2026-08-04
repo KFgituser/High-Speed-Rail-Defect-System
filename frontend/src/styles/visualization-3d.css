@@ -86,13 +86,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   background: #fff;
 }
 
 .visualization-image.scatter-image {
-  max-width: 75%;
+  display: block;
+  width: 100%;
+  max-width: 100%;
   box-shadow: none;
 }
 

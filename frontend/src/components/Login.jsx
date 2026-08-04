@@ -66,7 +66,7 @@ export default function Login() {
         localStorage.removeItem('savedUsername');
         localStorage.removeItem('savedPassword');
       }
-      navigate('/query');
+      navigate('/dashboard');
     } catch (error) {
       console.error(error);
       setErrors((prev) => ({ ...prev, login: t('login.errors.loginError') }));

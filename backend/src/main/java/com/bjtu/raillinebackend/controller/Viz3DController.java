@@ -1,52 +1,39 @@
 package com.bjtu.raillinebackend.controller;
 
-
-
-import com.bjtu.raillinebackend.dto.Run3DRecord;
-import com.bjtu.raillinebackend.dto.Run3DRequest;
-import com.bjtu.raillinebackend.service.Run3DService;
-import lombok.RequiredArgsConstructor;
+import com.bjtu.raillinebackend.dto.Viz3DLatestResponse;
+import com.bjtu.raillinebackend.dto.Viz3DStartRequest;
+import com.bjtu.raillinebackend.dto.Viz3DStartResponse;
+import com.bjtu.raillinebackend.service.Viz3DService;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
-import java.util.UUID;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
-@RequestMapping("/api/viz3d")
-@RequiredArgsConstructor
+@RequestMapping("/api/viz")
 public class Viz3DController {
 
-    private final Run3DService svc;
+    private final Viz3DService service;
 
-    /** 2D 页面发起：启动 3D 生成并立刻返回 runUuid */
-    @PostMapping("/run")
-    public Map<String, Object> run(@RequestBody Run3DRequest req) {
-        Run3DRecord rec = svc.start3D(req);
-        return Map.of(
-                "runUuid", rec.getRunUuid().toString(),
-                "status", rec.getStatus()
-        );
+    public Viz3DController(Viz3DService service) {
+        this.service = service;
     }
 
-    /** 3D 页面查询：按前端需要返回四个卡片项的数组（就绪后给出 imageUrl） */
-    @GetMapping("/status/{uuid}")
-    public List<Map<String, Object>> status(@PathVariable String uuid) {
-        Run3DRecord rec = svc.get(UUID.fromString(uuid));
-        if (rec == null) return List.of();
+    // 1) 启动 3D（立即返回 runUuid）
+    @PostMapping("/run3d")
+    public Viz3DStartResponse run3d(@RequestBody Viz3DStartRequest req) {
+        String runUuid = service.start3D(req);
+        return new Viz3DStartResponse(runUuid, req.getSlotId());
+    }
 
-        // 统一标题
-        String[] titles = {"3D图1", "3D图2", "3D图3", "3D图4"};
-        List<String> imgs = rec.getImageUrls() != null ? rec.getImageUrls() : List.of("", "", "", "");
-        List<Map<String, Object>> items = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-            items.add(Map.of(
-                    "title", titles[i],
-                    "imageUrl", i < imgs.size() ? imgs.get(i) : "",
-                    "date", rec.getDisplayTime(),
-                    "location", rec.getDisplayLocation(),
-                    "status", rec.getStatus()
-            ));
-        }
-        return items;
+    // 2) SSE：监听日志 / DONE / EXIT
+    @GetMapping(value = "/run3d/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter stream(@RequestParam("runUuid") String runUuid) {
+        return service.openStream(runUuid);
+    }
+
+    // 3) latest：给 3D 页面加载对应槽位最新图
+    @GetMapping("/run3d/latest")
+    public Viz3DLatestResponse latest(@RequestParam("slotId") int slotId) {
+        return service.getLatest(slotId);
     }
 }

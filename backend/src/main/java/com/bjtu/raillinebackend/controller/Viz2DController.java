@@ -24,16 +24,20 @@ public class Viz2DController {
 
     @Value("${viz.outDir}")   private String outDir;
     @Value("${viz.workDir}")  private String workDir;
+    @Value("${app.data.npyDir}") private String npyDir;
 
     private final PythonRunner runner;
     public Viz2DController(PythonRunner runner) { this.runner = runner; }
 
     @PostMapping("/run2d")
-    public ResponseEntity<?> run2d() {
+    public ResponseEntity<?> run2d(@RequestParam(value = "lang", required = false) String lang) {
         try {
             Map<String,String> env = new HashMap<>();
             env.put("MPLBACKEND", "Agg");
             env.put("VIZ_OUT_DIR", outDir);
+            env.put("MPLCONFIGDIR", new File(outDir, ".matplotlib").getAbsolutePath());
+            env.put("VIZ_NPY_DIR", npyDir);
+            env.put("VIZ_LANG", normalizeLang(lang));
 
             PythonRunner.Result r = runner.run(
                     pythonExe, script2d, new File(workDir), env, null, 100 * 60_000L);
@@ -51,5 +55,8 @@ public class Viz2DController {
         }
     }
 
-    
+    private String normalizeLang(String lang) {
+        if (lang == null) return "zh";
+        return lang.toLowerCase().startsWith("en") ? "en" : "zh";
+    }
 }

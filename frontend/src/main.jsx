@@ -7,6 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './i18n/index.js';
 import './styles/global.css';
+import './styles/portal-theme.css';
 
 const root = createRoot(document.getElementById('root'));
 root.render(

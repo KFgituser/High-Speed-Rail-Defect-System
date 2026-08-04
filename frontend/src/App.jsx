@@ -2,6 +2,7 @@
 import { useTranslation } from 'react-i18next';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Login from './components/Login.jsx';
+import DashboardHome from './components/DashboardHome.jsx';
 import Query from './components/Query.jsx';
 import Visualization2DPage from './components/Visualization2DPage.jsx';
 import Visualization3DPage from './components/Visualization3DPage.jsx';
@@ -17,6 +18,8 @@ function useTitle() {
 
     if (path === '/') {
       nextTitle = t('titles.login');
+    } else if (path.startsWith('/dashboard')) {
+      nextTitle = t('titles.dashboard');
     } else if (path.startsWith('/query')) {
       nextTitle = t('titles.query');
     } else if (path.startsWith('/visualization/2d')) {
@@ -38,6 +41,7 @@ export default function App() {
     <>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/dashboard" element={<DashboardHome />} />
         <Route path="/query" element={<Query />} />
         <Route path="/visualization/2d" element={<Visualization2DPage />} />
         <Route path="/visualization/2d/:id" element={<Visualization2DPage />} />

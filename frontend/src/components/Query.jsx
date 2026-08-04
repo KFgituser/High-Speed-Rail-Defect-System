@@ -614,36 +614,6 @@ export default function Query() {
     }
   };
 
-  const getDefectId = (item) => String(item?.id ?? item?.ID ?? item?.defectId ?? item?.detectionId ?? '').trim();
-
-  const openVisualization = (basePath, item) => {
-    const id = getDefectId(item);
-    if (item && id) {
-      sessionStorage.setItem('viz:defect', JSON.stringify(item));
-      navigate(`${basePath}/${id}`);
-      return;
-    }
-
-    sessionStorage.removeItem('viz:defect');
-    navigate(basePath);
-  };
-
-  const generate2D = (item) => {
-    openVisualization('/visualization/2d', item);
-  };
-
-  const generate3D = (item) => {
-    openVisualization('/visualization/3d', item);
-  };
-
-  const generateAll2D = () => {
-    openVisualization('/visualization/2d', displayedDetectionData[0]);
-  };
-
-  const generateAll3D = () => {
-    openVisualization('/visualization/3d', displayedDetectionData[0]);
-  };
-
   const goDetPage = (page) => {
     const nextPage = Math.min(Math.max(1, Number(page) || 1), detTotalPages);
     setDetPage(nextPage);
@@ -815,12 +785,6 @@ export default function Query() {
               </button>
               <button className="btn-export" onClick={() => exportData('all')} type="button">
                 {t('query.exportAll')}
-              </button>
-              <button className="btn-visualize" type="button" onClick={generateAll2D}>
-                {t('query.viz2dWang')}
-              </button>
-              <button className="btn-visualize" type="button" onClick={generateAll3D}>
-                {t('query.viz3d')}
               </button>
             </div>
           </div>

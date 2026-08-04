@@ -24,6 +24,7 @@ public class Viz2DStreamController {
     @Value("${viz.script2d}") private String script2d;
     @Value("${viz.workDir}")  private String workDir;
     @Value("${viz.outDir}")   private String outDir;
+    @Value("${app.data.npyDir}") private String npyDir;
 
     /**
      * 继续负责 2D 的 SSE， SSE：启动 2D 任务并实时推送日志/进度。
@@ -32,7 +33,10 @@ public class Viz2DStreamController {
      *   new EventSource(`${API}/viz/run2d/stream?file=${encodeURIComponent(filename)}`)
      */
     @GetMapping(path = "/run2d/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter run2dStream(@RequestParam(value = "file", required = false) String file) {
+    public SseEmitter run2dStream(
+            @RequestParam(value = "file", required = false) String file,
+            @RequestParam(value = "lang", required = false) String lang
+    ) {
         SseEmitter emitter = new SseEmitter(0L); // 不超时
 
         Executors.newSingleThreadExecutor().submit(() -> {
@@ -47,6 +51,9 @@ public class Viz2DStreamController {
                 Map<String, String> env = pb.environment();
                 env.put("MPLBACKEND", "Agg");
                 env.put("VIZ_OUT_DIR", outDir);
+                env.put("MPLCONFIGDIR", new File(outDir, ".matplotlib").getAbsolutePath());
+                env.put("VIZ_NPY_DIR", npyDir);
+                env.put("VIZ_LANG", normalizeLang(lang));
                 if (StringUtils.hasText(singleInput)) {
                     env.put("VIZ_INPUT_FILE", singleInput); // 仅跑该文件
                 }
@@ -100,6 +107,11 @@ public class Viz2DStreamController {
         // 统一分隔符
         decoded = decoded.replace('\\', '/');
         return decoded;
+    }
+
+    private String normalizeLang(String lang) {
+        if (!StringUtils.hasText(lang)) return "zh";
+        return lang.toLowerCase().startsWith("en") ? "en" : "zh";
     }
 }
 

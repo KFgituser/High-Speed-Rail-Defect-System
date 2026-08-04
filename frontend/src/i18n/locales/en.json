@@ -5,6 +5,7 @@
   },
   "titles": {
     "login": "User Login",
+    "dashboard": "Intelligent Inspection Platform",
     "query": "Query",
     "viz2d": "Defect Visualization 2D (Dynamic)",
     "viz3d": "Defect Visualization 3D"
@@ -121,8 +122,6 @@
     "exportDetection": "Export detection data",
     "exportLedger": "Export ledger data",
     "exportAll": "Export all",
-    "viz2dWang": "Visualization 2D",
-    "viz3d": "Visualization 3D View",
     "tableDetectionTitle": "Detection Data",
     "tableLedgerTitle": "Ledger Data",
     "filterAllSeverity": "All severities",

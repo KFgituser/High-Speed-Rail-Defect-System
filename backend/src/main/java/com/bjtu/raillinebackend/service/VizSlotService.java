@@ -25,7 +25,7 @@ public class VizSlotService {
     private final VizSlotRepository repo;
 
     // 根目录（与上面的静态映射一致）
-    private static final Path VIZ_OUT_DIR = Paths.get("D:/JH_Codebase王舒伦/output");
+    private static final Path VIZ_OUT_DIR = Paths.get("C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦/output");
     private static final Path SNAP_DIR    = VIZ_OUT_DIR.resolve("snapshots");
 
     public VizSlotService(VizSlotRepository repo) { this.repo = repo; }
@@ -94,10 +94,13 @@ public class VizSlotService {
         Path srcPng  = VIZ_OUT_DIR.resolve("viz2d.png");
         Path srcMeta = VIZ_OUT_DIR.resolve("viz2d_meta.json");
         Path srcDef  = VIZ_OUT_DIR.resolve("defects.json");
+        Path slotDataDir = VIZ_OUT_DIR.resolve("slot" + slotId);
 
         if (!Files.exists(srcPng)) {
             throw new FileNotFoundException("viz2d.png not found: " + srcPng);
         }
+
+        Files.createDirectories(slotDataDir);
 
         String ts = new java.text.SimpleDateFormat("yyyyMMdd-HHmmss").format(new java.util.Date());
         String base = "slot" + slotId + "-" + ts;
@@ -109,6 +112,8 @@ public class VizSlotService {
         Files.copy(srcPng,  dstPng,  StandardCopyOption.REPLACE_EXISTING);
         safeCopy(srcMeta, dstMeta);
         safeCopy(srcDef,  dstDef);
+
+        copy2dDataFor3d(slotDataDir);
 
         SnapshotResult r = new SnapshotResult();
         r.pngPath    = dstPng;
@@ -132,6 +137,24 @@ public class VizSlotService {
         try { if (src != null && Files.exists(src)) {
             Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
         }} catch (IOException ignore) {}
+    }
+
+    private void copy2dDataFor3d(Path slotDataDir) throws IOException {
+        String[] artifactNames = {
+                "amps_stack.npy",
+                "x_labels.npy",
+                "total_time_seconds.npy",
+                "y_ticks_like_2d.npy",
+                "defects.json",
+                "viz2d_meta.json"
+        };
+
+        for (String name : artifactNames) {
+            Path src = VIZ_OUT_DIR.resolve(name);
+            if (Files.exists(src)) {
+                Files.copy(src, slotDataDir.resolve(name), StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
     }
 
     private String readMetaLabel(Path metaJson, String key) {

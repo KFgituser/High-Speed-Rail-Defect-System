@@ -5,6 +5,7 @@
   },
   "titles": {
     "login": "用户登录",
+    "dashboard": "智能巡检分析平台",
     "query": "查询",
     "viz2d": "病害可视化 2D 动态详情",
     "viz3d": "病害可视化 3D 详情"
@@ -121,8 +122,6 @@
     "exportDetection": "导出检测数据",
     "exportLedger": "导出台账数据",
     "exportAll": "导出全部",
-    "viz2dWang": "病害2D动态视图",
-    "viz3d": "病害3D视图",
     "tableDetectionTitle": "检测数据",
     "tableLedgerTitle": "台账数据",
     "filterAllSeverity": "全部严重程度",

@@ -1,36 +1,46 @@
 ﻿import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import '../styles/back-to-top.css';
 
 const THRESHOLD = 200;
 
 export default function BackToTop() {
   const { t } = useTranslation();
+  const location = useLocation();
   const [visible, setVisible] = useState(false);
   const rafRef = useRef(0);
 
   useEffect(() => {
+    const scrollContainer = document.querySelector('.page-body');
+    const scrollTarget = scrollContainer || window;
+    const getScrollTop = () => (scrollContainer ? scrollContainer.scrollTop : window.scrollY);
+
     const onScroll = () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(() => {
-        setVisible(window.scrollY > THRESHOLD);
+        setVisible(getScrollTop() > THRESHOLD);
       });
     };
 
-    window.addEventListener('scroll', onScroll, { passive: true });
+    scrollTarget.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 
     return () => {
-      window.removeEventListener('scroll', onScroll);
+      scrollTarget.removeEventListener('scroll', onScroll);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, []);
+  }, [location.pathname]);
 
   const scrollTop = () => {
+    const scrollContainer = document.querySelector('.page-body');
+    const scrollTarget = scrollContainer || window;
+
     try {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollTarget.scrollTo({ top: 0, behavior: 'smooth' });
     } catch {
-      window.scrollTo(0, 0);
+      if (scrollContainer) scrollContainer.scrollTop = 0;
+      else window.scrollTo(0, 0);
     }
   };
 
