@@ -106,7 +106,7 @@ My responsibilities included structuring the repository, building the React fron
 
 | 3D Amplitude | 3D Scatter |
 | --- | --- |
-| <img src="docs/screenshots/visualization-3d-amplitude.png" alt="3D amplitude" width="360"> | <img src="docs/screenshots/visualization-3d-scatter.png" alt="3D scatter" width="360"> |
+| <img src="docs/screenshots/visualization-3d-amplitude.png" alt="3D amplitude" width="380"> | <img src="docs/screenshots/visualization-3d-scatter.png" alt="3D scatter" width="380"> |
 
 | Defect Validation |
 | --- |
