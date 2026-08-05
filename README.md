@@ -110,11 +110,11 @@ My responsibilities included structuring the repository, building the React fron
 
 | Defect Validation |
 | --- |
-| <img src="docs/screenshots/defect-validation-overview.png" alt="Defect validation" width="820"> |
+| <img src="docs/screenshots/defect-validation-overview.png" alt="Defect validation" width="800"> |
 
 | Defect Query |
 | --- |
-| <img src="docs/screenshots/defect-query.png" alt="Defect query" |
+| <img src="docs/screenshots/defect-query.png" alt="Defect query"> |
 
 ## Defect Validation Animation
 
