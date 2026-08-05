@@ -108,9 +108,13 @@ My responsibilities included structuring the repository, building the React fron
 | --- | --- |
 | <img src="docs/screenshots/visualization-3d-amplitude.png" alt="3D amplitude" width="380"> | <img src="docs/screenshots/visualization-3d-scatter.png" alt="3D scatter" width="380"> |
 
-| Defect Validation | Defect Query |
-| --- | --- |
-| <img src="docs/screenshots/defect-validation-overview.png" alt="Defect validation" width="360"> | <img src="docs/screenshots/defect-query.png" alt="Defect query" width="360"> |
+| Defect Validation |
+| --- |
+| <img src="docs/screenshots/defect-validation-overview.png" alt="Defect validation" width="760"> |
+
+| Defect Query |
+| --- |
+| <img src="docs/screenshots/defect-query.png" alt="Defect query" width="760"> |
 
 ## Defect Validation Animation
 
