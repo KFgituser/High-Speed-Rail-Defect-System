@@ -79,6 +79,39 @@ VITE_API_BASE=http://localhost:8080/api
 
 For local development, create `frontend/.env.local` if the backend runs on a different host or port. A sample file is provided at [frontend/.env.example](frontend/.env.example).
 
+## Docker Configuration
+
+Docker support is provided for local portfolio review and environment setup.
+
+- `frontend/Dockerfile` builds the React/Vite app with Node and serves the production bundle through Nginx.
+- `frontend/nginx/default.conf` proxies `/api/` and visualization output paths to the backend service.
+- `backend/Dockerfile` builds the Spring Boot service with Maven, then runs it on a Java 17 runtime image.
+- `backend/requirements-docker.txt` installs the Python packages needed by the visualization scripts inside the backend container.
+- `deploy/docker-compose.yml` starts MySQL, the backend API, and the frontend web server together.
+- `deploy/.env.example` documents the local environment variables used by Docker Compose.
+
+To run the stack with Docker:
+
+```bash
+cd deploy
+copy .env.example .env
+docker compose up --build
+```
+
+The frontend is exposed at:
+
+```text
+http://localhost:3000
+```
+
+The backend API is exposed at:
+
+```text
+http://localhost:8080/api
+```
+
+The compose file keeps generated database data and visualization outputs in Docker volumes. Real credentials should be provided through `deploy/.env` or the host environment rather than committed to Git.
+
 ## Documentation
 
 - [System Architecture](docs/architecture.md)

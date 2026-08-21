@@ -1,0 +1,8 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+einops==0.8.2
+fast_pytorch_kmeans==0.2.2
+matplotlib==3.11.1
+np==1.0.2
+numpy==2.5.1
+psutil==7.2.0
+torch==2.13.0+cpu

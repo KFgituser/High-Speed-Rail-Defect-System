@@ -4,17 +4,64 @@ services:
     container_name: rail-defect-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: rail_defect_root
-      MYSQL_DATABASE: railline
-      MYSQL_USER: rail_user
-      MYSQL_PASSWORD: rail_password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rail_defect_root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-railline}
+      MYSQL_USER: ${MYSQL_USER:-rail_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-rail_password}
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT:-3306}:3306"
     volumes:
       - rail_defect_mysql:/var/lib/mysql
+      - ../database:/docker-entrypoint-initdb.d:ro
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ../backend
+    container_name: rail-defect-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8080
+      DB_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-railline}?sslMode=DISABLED&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=utf8
+      DB_USERNAME: ${MYSQL_USER:-rail_user}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-rail_password}
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-long-random-secret-at-least-32-bytes}
+      PYTHON_EXE: /opt/venv/bin/python
+      VIZ_PYTHON: /opt/venv/bin/python
+      ANALYZE_SCRIPT: /analysis/scripts/plot_npy.py
+      VIZ_SCRIPT_2D: /analysis/scripts/front_side_2D.py
+      VIZ_SCRIPT_3D: /analysis/scripts/front_side_3D.py
+      VIZ_SCRIPT_3D_AMP: /analysis/scripts/front_side_3Damps_server.py
+      VIZ_OUTPUT_DIR: /app/output
+      VIZ_RUNS_DIR: /app/runs
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    volumes:
+      - ../python-analysis/scripts:/analysis/scripts:ro
+      - rail_defect_output:/app/output
+      - rail_defect_runs:/app/runs
+
+  frontend:
+    build:
+      context: ../frontend
+    container_name: rail-defect-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
 
 volumes:
   rail_defect_mysql:
+  rail_defect_output:
+  rail_defect_runs:
