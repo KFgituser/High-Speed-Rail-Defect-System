@@ -145,6 +145,10 @@ My responsibilities included structuring the repository, building the React fron
 | --- |
 | <img src="docs/screenshots/defect-validation-overview.png" alt="Defect validation" width="800"> |
 
+| Dashboard Home |
+| --- |
+| <img src="docs/screenshots/dashboard-home.png" alt="Dashboard home" width="800"> |
+
 | Defect Query |
 | --- |
 | <img src="docs/screenshots/defect-query.png" alt="Defect query"> |
