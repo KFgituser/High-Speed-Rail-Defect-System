@@ -1,16 +1,14 @@
 # High-Speed Rail Defect Detection System
 
-A full-stack web system for high-speed railway defect detection, inspection record management, and 2D/3D visualization. The project combines a React frontend, a Spring Boot backend, MySQL data storage, Excel export, and Python-based visualization scripts into one portfolio-friendly repository.
+Distributed Acoustic Sensing (DAS) is a technology that uses existing or dedicated optical fibers to detect vibrations along a route. It turns long-distance fiber into a continuous array of sensors capable of capturing train operations, track-structure changes, abnormal vibrations, and potential defects. Designed for high-speed railway applications, this project integrates DAS inspection data, defect queries, ledger management, and 2D/3D visualization into a demonstrable full-stack system, making inspection results easier to search, analyze, and present. The project combines a React frontend, a Spring Boot backend, MySQL data storage, Excel export, and Python-based visualization scripts into one portfolio-friendly repository.
 
 ![Login screen](docs/screenshots/login-screen.png)
 
 ## DAS Project Results
 
-![DAS project acceptance meeting](docs/screenshots/das-project-acceptance.png)
-
 The DAS project has completed preliminary acceptance. Participating experts and scholars unanimously recognized the project's phased achievements, agreed that it had passed preliminary acceptance, and awarded it a score of 94.
 
-Distributed Acoustic Sensing (DAS) is a technology that uses existing or dedicated optical fibers to detect vibrations along a route. It turns long-distance fiber into a continuous array of sensors capable of capturing train operations, track-structure changes, abnormal vibrations, and potential defects. Designed for high-speed railway applications, this project integrates DAS inspection data, defect queries, ledger management, and 2D/3D visualization into a demonstrable full-stack system, making inspection results easier to search, analyze, and present.
+![DAS project acceptance meeting](docs/screenshots/das-project-acceptance.png)
 
 ## My Role
 
