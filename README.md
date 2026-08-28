@@ -8,6 +8,9 @@ Distributed Acoustic Sensing (DAS) is a technology that uses existing or dedicat
 
 The DAS project has completed preliminary acceptance. Participating experts and scholars unanimously recognized the project's phased achievements, agreed that it had passed preliminary acceptance, and awarded it a score of 94.
 
+
+Acceptance Review Meeting for the Beijing–Shanghai High-Speed Railway Co., Ltd. Major Research Project: “Preliminary Research on an Online Monitoring System and Key Technologies for High-Speed Railway Ballastless Track Defects Based on Distributed Acoustic Sensing (DAS)”
+
 ![DAS project acceptance meeting](docs/screenshots/das-project-acceptance.png)
 
 ## My Role
