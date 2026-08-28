@@ -4,13 +4,13 @@ A full-stack web system for high-speed railway defect detection, inspection reco
 
 ![Login screen](docs/screenshots/login-screen.png)
 
-## DAS项目成果
+## DAS Project Results
 
 ![DAS project acceptance meeting](docs/screenshots/das-project-acceptance.png)
 
-DAS项目初步验收中，参会人员、专家学者一致认可项目阶段性成果，同意项目通过初步验收，并给出94分评分。
+The DAS project has completed preliminary acceptance. Participating experts and scholars unanimously recognized the project's phased achievements, agreed that it had passed preliminary acceptance, and awarded it a score of 94.
 
-DAS（Distributed Acoustic Sensing，分布式光纤声学传感）是一种利用既有或专用光纤感知沿线振动信号的技术。它可以把长距离光纤转化为连续分布的传感器阵列，用于捕捉列车运行、轨道结构变化、异常振动和潜在病害等信息。本项目围绕高速铁路场景，将DAS检测数据、病害查询、台账管理和2D/3D可视化展示整合到一个可演示的全栈系统中，帮助检测结果更直观地被检索、分析和汇报。
+Distributed Acoustic Sensing (DAS) is a technology that uses existing or dedicated optical fibers to detect vibrations along a route. It turns long-distance fiber into a continuous array of sensors capable of capturing train operations, track-structure changes, abnormal vibrations, and potential defects. Designed for high-speed railway applications, this project integrates DAS inspection data, defect queries, ledger management, and 2D/3D visualization into a demonstrable full-stack system, making inspection results easier to search, analyze, and present.
 
 ## My Role
 
