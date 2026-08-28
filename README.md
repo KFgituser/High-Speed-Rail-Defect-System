@@ -30,13 +30,25 @@ My responsibilities included structuring the repository, building the React fron
 
 ```text
 High-Speed-Rail-Defect-System/
-|-- backend/              # Spring Boot backend service
-|-- frontend/             # React + Vite frontend application
-|-- python-analysis/      # Python DAS analysis and visualization scripts
-|-- database/             # MySQL schema and demo seed data
-|-- docs/                 # Architecture notes, API docs, and screenshots
-|-- deploy/               # Local dependency setup
-`-- README.md             # Project overview and setup guide
+|-- .github/
+|   `-- workflows/ci.yml          # GitHub Actions test, package, and build workflow
+|-- backend/                      # Spring Boot backend service
+|   |-- Dockerfile                # Backend container image definition
+|   |-- pom.xml                   # Maven dependencies and package configuration
+|   `-- src/test/                 # JUnit tests and H2 test configuration
+|-- frontend/                     # React + Vite frontend application
+|   |-- Dockerfile                # Frontend container image definition
+|   |-- package.json              # npm scripts and frontend dependencies
+|   `-- src/
+|       |-- api/index.test.js     # API client tests
+|       |-- components/LanguageToggle.test.jsx
+|       `-- test/setup.js         # Vitest setup
+|-- python-analysis/              # Python DAS analysis and visualization scripts
+|-- database/                     # MySQL schema and demo seed data
+|-- docs/                         # Architecture notes, API docs, and screenshots
+|-- deploy/
+|   `-- docker-compose.yml        # Local Docker Compose stack
+`-- README.md                     # Project overview and setup guide
 ```
 
 ## Tech Stack

@@ -1,0 +1,39 @@
+app:
+  jwt:
+    secret: "test-only-jwt-secret-must-be-at-least-32-bytes-long"
+    issuer: "rail-line-backend-test"
+  data:
+    npyDir: ./target/test-data
+    thumbsDir: ./target/test-thumbs
+    plotsDir: ./target/test-plots
+  python:
+    exe: python
+    script: script.py
+
+viz:
+  python: python
+  script2d: script2d.py
+  outDir: ./target/test-viz-output
+  workDir: ./target/test-viz-work
+
+viz3d:
+  python: python
+  script-path: script3d.py
+  source-2d-dir: ./target/test-viz-work
+  base-out-dir: ./target/test-viz3d-output
+
+viz3damp:
+  python: python
+  script-path: script3damp.py
+  source-2d-dir: ./target/test-viz-work
+  base-out-dir: ./target/test-viz3damp-output
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:railline;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
