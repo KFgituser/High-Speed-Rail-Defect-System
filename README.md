@@ -4,6 +4,20 @@ A full-stack web system for high-speed railway defect detection, inspection reco
 
 ![Login screen](docs/screenshots/login-screen.png)
 
+## DAS项目成果
+
+![DAS project acceptance meeting](docs/screenshots/das-project-acceptance.png)
+
+DAS项目初步验收中，参会人员、专家学者一致认可项目阶段性成果，同意项目通过初步验收，并给出94分评分。
+
+DAS（Distributed Acoustic Sensing，分布式光纤声学传感）是一种利用既有或专用光纤感知沿线振动信号的技术。它可以把长距离光纤转化为连续分布的传感器阵列，用于捕捉列车运行、轨道结构变化、异常振动和潜在病害等信息。本项目围绕高速铁路场景，将DAS检测数据、病害查询、台账管理和2D/3D可视化展示整合到一个可演示的全栈系统中，帮助检测结果更直观地被检索、分析和汇报。
+
+## My Role
+
+The defect detection logic and DAS-based analysis scripts were derived from doctoral research work at Beijing Jiaotong University. Based on these research outputs, I developed a full-stack web system to make the detection results queryable, visualizable, and easier to demonstrate.
+
+My responsibilities included structuring the repository, building the React frontend, connecting Spring Boot APIs, integrating Python-based 2D/3D visualization scripts, configuring the query and export workflows, and presenting railway defect detection results through an interactive web interface.
+
 ## Project Highlights
 
 - Full-stack project structure with separate `frontend/` and `backend/` modules.
@@ -120,12 +134,6 @@ The compose file keeps generated database data and visualization outputs in Dock
 - [Database Setup](database/README.md)
 - [Backend Guide](backend/README.md)
 - [Frontend Guide](frontend/README.md)
-
-## My Role
-
-The defect detection logic and DAS-based analysis scripts were derived from doctoral research work at Beijing Jiaotong University. Based on these research outputs, I developed a full-stack web system to make the detection results queryable, visualizable, and easier to demonstrate.
-
-My responsibilities included structuring the repository, building the React frontend, connecting Spring Boot APIs, integrating Python-based 2D/3D visualization scripts, configuring the query and export workflows, and presenting railway defect detection results through an interactive web interface.
 
 ## Known Limitations
 
