@@ -88,7 +88,8 @@ public class NpyAnalysisService {
             throw new IllegalArgumentException("filename is required");
         }
         Path suppliedPath = Path.of(filename);
-        if (suppliedPath.isAbsolute() || suppliedPath.getNameCount() != 1
+        if (filename.indexOf('\\') >= 0 || filename.indexOf(':') >= 0
+                || suppliedPath.isAbsolute() || suppliedPath.getNameCount() != 1
                 || !suppliedPath.getFileName().toString().equals(filename)
                 || !filename.toLowerCase(Locale.ROOT).endsWith(".npy")) {
             throw new IllegalArgumentException("filename must be a .npy file name");

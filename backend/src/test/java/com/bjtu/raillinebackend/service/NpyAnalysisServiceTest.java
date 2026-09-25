@@ -41,6 +41,7 @@ class NpyAnalysisServiceTest {
 
         assertThrows(IllegalArgumentException.class, () -> service.analyze("../secret.npy"));
         assertThrows(IllegalArgumentException.class, () -> service.analyze("C:\\secret.npy"));
+        assertThrows(IllegalArgumentException.class, () -> service.analyze("C:secret.npy"));
         assertThrows(IllegalArgumentException.class, () -> service.analyze("not-npy.txt"));
     }
 
