@@ -51,7 +51,7 @@ const railwayRoutes = [
       { x: 540, y: 183, label: { zh: '蚌埠南', en: 'Bengbu S.' } },
       { x: 656, y: 166, label: { zh: '镇江南', en: 'Zhenjiang S.' } },
       { x: 738, y: 197, label: { zh: '常州北', en: 'Changzhou N.' } },
-      { x: 770, y: 192, label: { zh: '无锡东', en: 'Wuxi E.' } },
+      { x: 770, y: 192, label: { zh: '无锡东', en: 'Wuxi E.' }, labelDy: -18 },
       { x: 816, y: 208, label: { zh: '苏州北', en: 'Suzhou N.' } },
       { x: 914, y: 233, label: { zh: '上海虹桥', en: 'Shanghai Hongqiao' }, terminal: true }
     ],
@@ -293,7 +293,7 @@ function RouteMap({ route, onRouteChange, isEnglish, copy }) {
             {station.terminal ? <circle cx={station.x} cy={station.y} r="2.5" className="route-terminal-dot" /> : null}
             <text
               x={station.x - (index === route.stations.length - 1 ? 7 : 0)}
-              y={station.y + (index % 2 ? 25 : 29)}
+              y={station.y + (station.labelDy ?? (index % 2 ? 25 : 29))}
               textAnchor={index === route.stations.length - 1 ? 'end' : 'middle'}
               className="route-label"
             >

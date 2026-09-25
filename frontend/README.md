@@ -4,7 +4,7 @@ React frontend for a high-speed rail defect detection and visualization system.
 
 This interface brings login, multilingual navigation, defect query workflows, and 2D/3D visualization pages into one portfolio-friendly repository.
 
-![Login screen](./docs/login-screen.png)
+![Login screen](../docs/screenshots/login-screen.png)
 
 ## Features
 
@@ -12,6 +12,7 @@ This interface brings login, multilingual navigation, defect query workflows, an
 - Chinese and English language switching
 - Login page with remembered account support
 - Defect query, detail, and export workflows
+- Multi-type and numeric mileage filters applied before pagination, including Excel exports
 - 2D and 3D visualization pages connected to the backend API
 
 ## Getting Started
@@ -40,9 +41,16 @@ Build for production:
 npm run build
 ```
 
+Run the checks used by CI:
+
+```bash
+npm test
+npm run build
+```
+
 ## Backend API
 
-By default, the frontend connects to:
+By default, the frontend uses the `/api` proxy. Local Vite development forwards it to:
 
 ```text
 http://localhost:8080/api

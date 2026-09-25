@@ -22,10 +22,10 @@ My responsibilities included structuring the repository, building the React fron
 ## Project Highlights
 
 - Full-stack project structure with separate `frontend/` and `backend/` modules.
-- Defect query workflow based on railway line, mileage range, inspection date, severity, and defect type.
+- Defect query workflow based on railway line, numeric mileage range, inspection date, severity, and multiple defect types.
 - Side-by-side comparison between detection results and maintenance ledger records.
 - Detail modal for defect history, suggestions, and inspection metadata.
-- Excel export for detection results, ledger records, and combined datasets.
+- Filtered Excel export for detection results, ledger records, and combined datasets.
 - 2D/3D visualization workflow with generated analysis images and downloadable results.
 - Environment-variable-based backend configuration to avoid committing local passwords, script paths, or secrets.
 
@@ -68,8 +68,8 @@ High-Speed-Rail-Defect-System/
 
 - User login and JWT-based authentication
 - Railway line and defect type metadata APIs
-- Defect detection result query, filtering, sorting, and pagination
-- Maintenance ledger query, filtering, sorting, and pagination
+- Defect detection result query with server-side filtering and pagination
+- Maintenance ledger query with server-side filtering and pagination
 - Defect detail view with history and maintenance suggestion
 - Excel export for detection, ledger, and combined data
 - 2D visualization generation and result display
@@ -89,16 +89,15 @@ Common variables:
 | `DB_URL` | MySQL JDBC URL |
 | `DB_USERNAME` | MySQL username |
 | `DB_PASSWORD` | MySQL password |
-| `JWT_SECRET` | JWT signing secret |
+| `APP_JWT_SECRET` | JWT signing secret (at least 32 characters) |
+| `INIT_ADMIN_USERNAME` / `INIT_ADMIN_PASSWORD` | Initial administrator credentials when enabled |
 | `PYTHON_EXE` | Python executable path |
-| `ANALYZE_SCRIPT` | NPY analysis script path |
-| `VIZ_SCRIPT_2D` | 2D visualization script path |
-| `VIZ_SCRIPT_3D` | 3D visualization script path |
-| `VIZ_SCRIPT_3D_AMP` | 3D amplitude visualization script path |
+| `JH_CODEBASE_DIR` | Directory containing visualization scripts and output |
+| `NPY_DIR` | Directory containing DAS `.npy` data |
 
 ## Frontend Configuration
 
-The frontend reads the backend API base URL from a Vite environment variable:
+The frontend uses `/api` by default; Vite and Nginx proxy that path to the backend. To override it, set:
 
 ```env
 VITE_API_BASE=http://localhost:8080/api
@@ -122,6 +121,7 @@ To run the stack with Docker:
 ```bash
 cd deploy
 copy .env.example .env
+# Edit .env and set database, JWT, and initial administrator passwords.
 docker compose up --build
 ```
 
@@ -137,7 +137,7 @@ The backend API is exposed at:
 http://localhost:8080/api
 ```
 
-The compose file keeps generated database data and visualization outputs in Docker volumes. Real credentials should be provided through `deploy/.env` or the host environment rather than committed to Git.
+The compose file keeps database data in a Docker volume. It mounts the script and NPY directories from the host. Set `JH_CODEBASE_HOST_DIR` and `NPY_HOST_DIR` in `deploy/.env` to use the full visualization workflow; the included public scripts and demo records are enough to explore the query and export screens. The original DAS datasets and algorithm environment are not part of this repository. Credentials belong in `deploy/.env`, which is ignored by Git.
 
 ## Documentation
 
@@ -151,7 +151,7 @@ The compose file keeps generated database data and visualization outputs in Dock
 ## Known Limitations
 
 - The visualization scripts and raw railway inspection datasets are environment-dependent and may require local path configuration before running end to end.
-- The repository includes configuration examples, but production deployment should provide real database credentials and a strong `JWT_SECRET` through environment variables.
+- The repository includes configuration examples, but deployment requires database credentials, an initial administrator password, and a strong `APP_JWT_SECRET` through environment variables.
 - Demo database schema and seed data are included for portfolio review, but production data and raw DAS datasets are intentionally excluded.
 - Model checkpoints, raw DAS datasets, generated `.npy` files, and runtime output directories are intentionally excluded from Git because of file size and data privacy constraints.
 - The frontend build currently produces a large JavaScript bundle; code splitting can be added later to improve production loading performance.

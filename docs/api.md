@@ -32,9 +32,16 @@ Common query parameters:
 | Parameter | Description |
 | --- | --- |
 | `line` | Railway line name. |
-| `type` | Defect type. |
-| `start` | Start date. |
-| `end` | End date. |
+| `type` | Optional single type selected in one result table. |
+| `types` | Comma-separated types selected in the main query form. When `type` is also set, both filters apply. |
+| `minMileage`, `maxMileage` | Inclusive numeric mileage bounds in metres; `K500+123` is `500123`. |
+| `severity` | One of `轻微`, `一般`, or `严重`. |
+| `start`, `end` | Inclusive ISO dates (`YYYY-MM-DD`). |
+| `q` | Optional description or location text search. |
+| `page`, `size` | Zero-based page number and page size (1–100). |
+| `sortDir` | `asc` or `desc` by record date. |
+
+Both list endpoints apply filters in the database before pagination and return a page object with `content`, `page`, `size`, `totalElements`, and `totalPages`.
 
 ## Export
 
@@ -43,6 +50,9 @@ Common query parameters:
 | `GET` | `/export-detection` | Exports defect detection results as an Excel file. |
 | `GET` | `/export-ledger` | Exports maintenance ledger records as an Excel file. |
 | `GET` | `/export-all` | Exports the combined dataset as an Excel file. |
+| `GET` | `/export-detail/{id}` | Exports the selected detection or ledger detail. |
+
+Exports accept `line`, `types`, `minMileage`, `maxMileage`, `start`, `end`, and `q`. Use `detectionType` / `detectionSeverity` for the detection sheet and `ledgerType` / `ledgerSeverity` for the ledger sheet. These match the two table filters on the query page.
 
 ## Visualization
 

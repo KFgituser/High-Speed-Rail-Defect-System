@@ -26,14 +26,14 @@ On Windows:
 | --- | --- | --- |
 | `SERVER_PORT` | `8080` | Backend service port. |
 | `DB_URL` | `jdbc:mysql://localhost:3306/railline?...` | MySQL connection URL. |
-| `DB_USERNAME` | `root` | Database username. |
-| `DB_PASSWORD` | Empty | Database password. |
-| `JWT_SECRET` | Example value | JWT signing secret. Replace it before deployment. |
-| `PYTHON_EXE` | `C:/Python313/python.exe` | Python executable path. |
-| `ANALYZE_SCRIPT` | `../python-analysis/scripts/plot_npy.py` | NPY analysis script path. |
-| `VIZ_SCRIPT_2D` | `../python-analysis/scripts/front_side_2D.py` | 2D visualization script path. |
-| `VIZ_SCRIPT_3D` | `../python-analysis/scripts/front_side_3D.py` | 3D visualization script path. |
-| `VIZ_SCRIPT_3D_AMP` | `../python-analysis/scripts/front_side_3Damps_server.py` | 3D amplitude visualization script path. |
+| `DB_USERNAME` | Required | Database username. |
+| `DB_PASSWORD` | Required | Database password. |
+| `APP_JWT_SECRET` | Required | JWT signing secret, at least 32 characters. |
+| `INIT_ADMIN_ENABLED` | `false` | Create an initial administrator when enabled. |
+| `INIT_ADMIN_USERNAME` / `INIT_ADMIN_PASSWORD` | Empty | Initial administrator credentials. |
+| `PYTHON_EXE` | Local path | Python executable path. |
+| `JH_CODEBASE_DIR` | Local path | Visualization scripts and output directory. |
+| `NPY_DIR` | Local path | DAS `.npy` data directory. |
 
 ## Main Modules
 
@@ -42,4 +42,4 @@ On Windows:
 - `repository`: Spring Data JPA repositories.
 - `security`: JWT authentication and request filtering.
 - `viz`: Python script execution wrapper.
-The Python analysis and visualization scripts are kept in the top-level `python-analysis/` module and are referenced by backend configuration.
+The full Python analysis environment and raw DAS datasets are external; set `JH_CODEBASE_DIR` and `NPY_DIR` to use them. The public `python-analysis/` module contains examples for repository review.

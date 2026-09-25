@@ -1,23 +1,30 @@
 package com.bjtu.raillinebackend.controller;
 
-// controller/MetaController.java
-import com.bjtu.raillinebackend.entity.diseaseType;
-import com.bjtu.raillinebackend.entity.rail_line;
-import com.bjtu.raillinebackend.repository.DiseaseTypeRepository;
-import com.bjtu.raillinebackend.repository.RailLineRepository;
-import org.springframework.web.bind.annotation.*;
+import com.bjtu.raillinebackend.dto.DiseaseTypeResponse;
+import com.bjtu.raillinebackend.dto.RailLineResponse;
+import com.bjtu.raillinebackend.service.MetaService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
 
-@RestController @RequestMapping("/api")
+@RestController
+@RequestMapping("/api")
 public class MetaController {
-    private final RailLineRepository lineRepo;
-    private final DiseaseTypeRepository typeRepo;
+    private final MetaService metaService;
 
-    public MetaController(RailLineRepository l, DiseaseTypeRepository t){
-        this.lineRepo=l;
-        this.typeRepo=t;
+    public MetaController(MetaService metaService) {
+        this.metaService = metaService;
     }
 
-    @GetMapping("/lines") public List<rail_line> lines(){ return lineRepo.findAll(); }
-    @GetMapping("/disease-types") public List<diseaseType> types(){ return typeRepo.findAll(); }
+    @GetMapping("/lines")
+    public List<RailLineResponse> lines() {
+        return metaService.findLines();
+    }
+
+    @GetMapping("/disease-types")
+    public List<DiseaseTypeResponse> types() {
+        return metaService.findDiseaseTypes();
+    }
 }

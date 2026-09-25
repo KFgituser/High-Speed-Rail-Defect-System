@@ -14,7 +14,37 @@
     "title": "高铁线路病害查询系统",
     "subtitle": "高速铁路病害查询系统",
     "welcome": "欢迎，管理员",
-    "logout": "退出"
+    "logout": "退出",
+    "platform": "智能巡检分析平台",
+    "messages": "消息中心",
+    "latestAlarm": "最新告警",
+    "alarmExample": "DK512+300 轨道波磨",
+    "unread": "共 12 条未读消息",
+    "account": "账户设置",
+    "accountInfo": "账户信息",
+    "username": "用户名",
+    "role": "角色",
+    "accountHint": "如需修改账户资料或密码，请联系系统管理员。",
+    "fullscreen": "全屏",
+    "defaultUser": "用户"
+  },
+  "nav": {
+    "overview": "线路总览",
+    "realtime": "实时监测",
+    "query": "病害查询",
+    "2d": "2D 分析",
+    "3d": "3D 分析",
+    "analytics": "数据分析",
+    "devices": "设备监测",
+    "reports": "报表管理",
+    "system": "系统管理",
+    "collapse": "收起"
+  },
+  "footer": {
+    "systemStatus": "系统状态",
+    "normal": "正常",
+    "lastUpdated": "数据更新时间",
+    "currentLine": "当前线路：京沪高铁 K0+000 ~ DK1318+000"
   },
   "common": {
     "back": "返回",
@@ -27,6 +57,9 @@
     "refreshList": "刷新列表",
     "refreshing": "刷新中…",
     "loading": "加载中…",
+    "loadFailed": "加载失败",
+    "noData": "暂无数据",
+    "retry": "重试",
     "running": "运行中…",
     "done": "完成",
     "success": "完成",
@@ -44,6 +77,11 @@
     "selectedHint": "已选 Ctrl + 点击增减 Shift + 点击范围筛选",
     "generating": "生成中…",
     "export": "导出"
+  },
+  "errorBoundary": {
+    "title": "页面暂时无法显示",
+    "message": "发生了意外错误，请重试。",
+    "retry": "重新加载页面"
   },
   "severity": {
     "severe": "严重",
@@ -68,7 +106,7 @@
     "passwordLabel": "密码",
     "usernamePlaceholder": "请输入用户名",
     "passwordPlaceholder": "请输入密码",
-    "rememberMe": "记住密码",
+    "rememberMe": "记住用户名",
     "forgotPassword": "忘记密码？",
     "submit": "登录",
     "recoverTitle": "找回密码",
@@ -154,6 +192,7 @@
     "fieldSeverity": "严重程度",
     "photos": "现场照片",
     "photoPreview": "照片预览",
+    "noPhotos": "暂无关联的现场照片",
     "suggestion": "处理建议",
     "history": "历史记录",
     "modalClose": "关闭",
@@ -164,6 +203,7 @@
     "filenameDetection": "检测数据.xlsx",
     "filenameLedger": "台账数据.xlsx",
     "filenameAll": "全部数据.xlsx",
+    "filenameDetail": "病害详情-{{id}}.xlsx",
     "closeAria": "关闭"
   },
   "viz2d": {
@@ -215,6 +255,8 @@
     "scatterTitle": "3D散点图",
     "ampTitle": "3D振幅图",
     "generating": "3D图片生成中...",
+    "generateFailed": "3D图片生成失败，请重试",
+    "generateTimeout": "3D图片生成超时，请重试",
     "noImage": "暂无 3D 图片",
     "date": "记录时间",
     "location": "位置区间",
@@ -223,6 +265,7 @@
     "ampGenerating": "3D振幅图生成中...",
     "ampGenerate": "生成 3D振幅图",
     "ampGenerateFailed": "生成 3D振幅图失败",
+    "ampGenerateTimeout": "生成 3D振幅图超时，请重试",
     "downloadFailed": "下载失败",
     "downloadFailedStatus": "下载失败：HTTP {{status}}",
     "scatterItemTitle": "散点图",

@@ -2,8 +2,13 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import api from '../api/index.js';
+import { analyzeVisualizationFile, getVisualizationFiles } from '../api/visualization.js';
+import { openAuthorizedSse } from '../api/sse.js';
 import { resolveCurrentLang } from '../i18n/index.js';
 import AppLayout from './AppLayout.jsx';
+import AnalysisComparison from './visualization2d/AnalysisComparison.jsx';
+import VisualizationSlots from './visualization2d/VisualizationSlots.jsx';
+import TargetSlotDialog from './visualization2d/TargetSlotDialog.jsx';
 import '../styles/visualization-2d.css';
 
 const LINE_OPTIONS = [
@@ -305,8 +310,7 @@ export default function Visualization2DPage() {
   const loadFiles = async () => {
     setLoadingFiles(true);
     try {
-      const res = await fetch(`${apiBase}/files`);
-      const data = await res.json();
+      const data = await getVisualizationFiles();
       const nextFiles = Array.isArray(data) ? data : [];
       setFiles(nextFiles);
       setSelected((prev) => {
@@ -332,14 +336,7 @@ export default function Visualization2DPage() {
     if (!selectedFileName) return;
     setRunningAnalyze(true);
     try {
-      const form = new URLSearchParams();
-      form.set('filename', selectedFileName);
-      const res = await fetch(`${apiBase}/analyze`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: form
-      });
-      const data = await res.json();
+      const data = await analyzeVisualizationFile(selectedFileName);
       if (data?.imageUrl) {
         onAnalyzeDoneForChart2(data.imageUrl);
       }
@@ -410,6 +407,9 @@ export default function Visualization2DPage() {
           setAnalysisCol(slotId - 1, data);
         }
       } catch (error) {
+        if (error.response?.status === 404) {
+          continue;
+        }
         console.warn('[analysis] load latest failed for slot', slotId, error);
       }
     }
@@ -816,17 +816,15 @@ export default function Visualization2DPage() {
     const fileBase = apiBase.replace('/api', '');
     const query = encodeURIComponent(selectedFileName);
     const lang = getActiveLang();
-    esRef.current = new EventSource(
-      `${apiBase}/viz/run2d/stream?file=${query}&lang=${encodeURIComponent(lang)}`,
-      { withCredentials: true }
-    );
-
     previewTimerRef.current = setInterval(() => {
       setPreviewUrl(`${fileBase}/viz-out/viz2d_preview.png?t=${Date.now()}`);
     }, 700);
 
-    esRef.current.onmessage = async (event) => {
-      const line = event.data || '';
+    esRef.current = openAuthorizedSse(
+      `${apiBase}/viz/run2d/stream?file=${query}&lang=${encodeURIComponent(lang)}`,
+      {
+        onEvent: async ({ data }) => {
+      const line = data || '';
       if (line.startsWith('FILE ')) {
         const parts = line.split(' ');
         setCurrentFile(parts.slice(2).join(' '));
@@ -896,12 +894,13 @@ export default function Visualization2DPage() {
           }
         }
       }
-    };
-
-    esRef.current.onerror = () => {
-      setRunStatus('error');
-      cleanupSse();
-    };
+        },
+        onError: () => {
+          setRunStatus('error');
+          cleanupSse();
+        }
+      }
+    );
   };
 
   const generate3DThenGo = async (index) => {
@@ -1027,76 +1026,9 @@ export default function Visualization2DPage() {
           </div>
         </section>
 
-        {analysisData ? (
-          <div className="analysis-section">
-            <h2>{t('viz2d.analysisTitle')}</h2>
-            <div className="analysis-content">
-              <div className="analysis-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>{t('viz2d.analysisMetric')}</th>
-                      {comparisonItems.map((item, index) => (
-                        <th key={`analysis-${index}`}>{item.title}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {analysisRows.map((row) => (
-                      <tr key={row.key}>
-                        <td>{t(`viz2d.analysisRows.${row.key}`)}</td>
-                        <td>{row.v1}</td>
-                        <td>{row.v2}</td>
-                        <td>{row.v3}</td>
-                        <td>{row.v4}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <button className="btn-export-analysis" onClick={exportAnalysis} type="button">
-                {t('viz2d.exportAnalysis')}
-              </button>
-            </div>
-          </div>
-        ) : null}
+        <AnalysisComparison visible={Boolean(analysisData)} items={comparisonItems} rows={analysisRows} onExport={exportAnalysis} />
 
-        <div className="visualization-section">
-          <h2>{t('viz2d.resultTitle')}</h2>
-          <div className="visualization-grid">
-            {comparisonItems.map((item, index) => (
-              <div className="view-container" key={`viz-${index}`}>
-                <div className="view-header">
-                  <h3>{item.title}</h3>
-                  <button
-                    className="btn-to-3d"
-                    type="button"
-                    disabled={gen3dBusyIndex === index}
-                    onClick={() => generate3DThenGo(index)}
-                  >
-                    {gen3dBusyIndex === index ? t('common.generating') : t('viz2d.generate3d')}
-                  </button>
-                </div>
-                <div className="image-container">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="visualization-image"
-                    onError={() => onImgError(index)}
-                  />
-                  <div className="image-info">
-                    <p>
-                      <strong>{t('viz2d.recordTime')}:</strong> {item.date}
-                    </p>
-                    <p>
-                      <strong>{t('viz2d.locationRange')}:</strong> {item.startLabel || displayStartText} - {item.endLabel || displayEndText}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <VisualizationSlots items={comparisonItems} busyIndex={gen3dBusyIndex} defaultStart={displayStartText} defaultEnd={displayEndText} onGenerate3D={generate3DThenGo} onImageError={onImgError} />
       </div>
 
       {liveOpen ? (
@@ -1154,38 +1086,13 @@ export default function Visualization2DPage() {
         </div>
       ) : null}
 
-      {showTargetDialog ? (
-        <div className="gt-modal-mask" onClick={(event) => event.target === event.currentTarget && setShowTargetDialog(false)}>
-          <div className="gt-modal">
-            <h3 style={{ margin: '0 0 12px' }}>{t('viz2d.targetTitle')}</h3>
-
-            <select
-              className="form-input"
-              style={{ width: '100%', marginTop: '8px' }}
-              value={resultTarget ?? ''}
-              onChange={(event) => {
-                const nextTarget = Number(event.target.value);
-                setResultTarget(nextTarget);
-                resultTargetRef.current = nextTarget;
-              }}
-            >
-              <option value={0}>{t('viz2d.slotLabel', { slot: 1 })}</option>
-              <option value={1}>{t('viz2d.slotLabel', { slot: 2 })}</option>
-              <option value={2}>{t('viz2d.slotLabel', { slot: 3 })}</option>
-              <option value={3}>{t('viz2d.slotLabel', { slot: 4 })}</option>
-            </select>
-
-            <div className="gt-modal-actions">
-              <button className="btn-secondary" onClick={() => setShowTargetDialog(false)} type="button">
-                {t('common.cancel')}
-              </button>
-              <button className="btn-primary" type="button" disabled={resultTarget === null} onClick={confirmTarget}>
-                {t('common.confirm')}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <TargetSlotDialog
+        open={showTargetDialog}
+        target={resultTarget}
+        onChange={(nextTarget) => { setResultTarget(nextTarget); resultTargetRef.current = nextTarget; }}
+        onCancel={() => setShowTargetDialog(false)}
+        onConfirm={confirmTarget}
+      />
     </AppLayout>
   );
 }

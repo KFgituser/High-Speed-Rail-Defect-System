@@ -2,7 +2,7 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import LanguageToggle from './LanguageToggle.jsx';
-import { API_BASE } from '../api/index.js';
+import { login } from '../api/auth.js';
 import '../styles/login.css';
 
 export default function Login() {
@@ -24,11 +24,10 @@ export default function Login() {
 
   useEffect(() => {
     const savedUsername = localStorage.getItem('savedUsername');
-    const savedPassword = localStorage.getItem('savedPassword');
+    localStorage.removeItem('savedPassword');
 
-    if (savedUsername && savedPassword) {
+    if (savedUsername) {
       setUsername(savedUsername);
-      setPassword(savedPassword);
       setRememberMe(true);
     }
 
@@ -44,32 +43,20 @@ export default function Login() {
     setErrors((prev) => ({ ...prev, login: '' }));
 
     try {
-      const res = await fetch(`${API_BASE}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        setErrors((prev) => ({ ...prev, login: text || t('login.errors.loginFailed') }));
-        return;
-      }
-
-      const data = await res.json();
+      const data = await login({ username, password });
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data));
       if (rememberMe) {
         localStorage.setItem('savedUsername', username);
-        localStorage.setItem('savedPassword', password);
       } else {
         localStorage.removeItem('savedUsername');
-        localStorage.removeItem('savedPassword');
       }
+      localStorage.removeItem('savedPassword');
       navigate('/dashboard');
     } catch (error) {
       console.error(error);
-      setErrors((prev) => ({ ...prev, login: t('login.errors.loginError') }));
+      const message = error.response?.data?.message || error.response?.data?.msg || t('login.errors.loginError');
+      setErrors((prev) => ({ ...prev, login: message }));
     }
   };
 
@@ -226,6 +213,7 @@ export default function Login() {
                 <input
                   type="text"
                   id="username"
+                  autoComplete="username"
                   value={username}
                   onChange={(event) => setUsername(event.target.value)}
                   placeholder={t('login.usernamePlaceholder')}
@@ -241,6 +229,7 @@ export default function Login() {
                 <input
                   type="password"
                   id="password"
+                  autoComplete="current-password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder={t('login.passwordPlaceholder')}

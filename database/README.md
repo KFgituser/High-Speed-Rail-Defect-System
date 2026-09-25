@@ -9,7 +9,7 @@ The scripts are cleaned for portfolio use. They contain table definitions and sm
 | File | Description |
 | --- | --- |
 | `schema.sql` | Creates the `railline` database and application tables. |
-| `seed-demo.sql` | Inserts small demo records for lines, defect types, detections, ledgers, visualization slots, and analysis results. |
+| `seed-demo.sql` | Inserts small Chinese-language demo records for lines, defect types, detections, and ledgers. |
 | `load-data-example.sql` | Shows how CSV import can be performed with `LOAD DATA LOCAL INFILE`. It is an example only. |
 
 ## Import Order
@@ -32,4 +32,6 @@ DB_URL=jdbc:mysql://localhost:3306/railline?sslMode=DISABLED&allowPublicKeyRetri
 DB_USERNAME=root
 DB_PASSWORD=your_password
 ```
+
+The demo records use `K<kilometres>+<metres>` locations and Chinese severity values (`轻微`, `一般`, `严重`), matching the backend enum and mileage-range query. No administrator password is stored in the seed file; set `INIT_ADMIN_ENABLED`, `INIT_ADMIN_USERNAME`, and `INIT_ADMIN_PASSWORD` when starting the backend.
 

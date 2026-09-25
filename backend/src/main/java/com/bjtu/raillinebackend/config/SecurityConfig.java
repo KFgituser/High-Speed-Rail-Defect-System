@@ -12,8 +12,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -42,12 +46,26 @@ public class SecurityConfig {
     @Bean
     public JwtUtil jwtUtil(
             @Value("${app.jwt.secret}") String secret,  // JWT 签名密钥
-            @Value("${app.jwt.expire-minutes}") long expireMinutes) {       // 过期时间
-        return new JwtUtil(secret, expireMinutes);
+            @Value("${app.jwt.expire-minutes}") long expireMinutes,
+            @Value("${app.jwt.issuer}") String issuer) {       // 过期时间
+        return new JwtUtil(secret, expireMinutes, issuer);
     }
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    private DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService,
+                                                             PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return provider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService,
+                                                       PasswordEncoder passwordEncoder) {
+        return new ProviderManager(authenticationProvider(userDetailsService, passwordEncoder));
     }
 
     @Bean
@@ -73,10 +91,8 @@ public class SecurityConfig {
 
                         // 先放行具体接口，再兜底拦住其余 /api
                         .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
-                        .requestMatchers("/api/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/viz3d-out/**","/viz3damp-out/**","/viz-out/**").permitAll()
                         .requestMatchers("/error/**").permitAll()  // 图像文件文件放行
-                        .requestMatchers(HttpMethod.POST, "/api/viz/run3d", "/api/run3d/**").permitAll()
                         .requestMatchers("/output/**").permitAll() // 需要登录
                         // 放行静态资源（缩略图、分析结果图）
                         .requestMatchers("/thumbs/**", "/plots/**").permitAll()
@@ -100,7 +116,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
-        cfg.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173"));
+        cfg.setAllowedOrigins(List.of("http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173"));
         cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
         cfg.setAllowCredentials(true);  //允许带cookie/ 授权信息

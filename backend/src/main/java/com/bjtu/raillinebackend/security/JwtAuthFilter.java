@@ -26,12 +26,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
         String auth = req.getHeader("Authorization");
-        if (auth != null && auth.startsWith("Bearer ")) {
+        if (auth != null && auth.startsWith("Bearer ")
+                && SecurityContextHolder.getContext().getAuthentication() == null) {
             String token = auth.substring(7);
             try {
                 var jws = jwt.parse(token);
                 String username = jws.getBody().getSubject();
-                String role = (String) jws.getBody().getOrDefault("role", "ADMIN");
+                String role = String.valueOf(jws.getBody().getOrDefault("role", "USER"))
+                        .trim()
+                        .toUpperCase();
+                if (role.isBlank()) {
+                    role = "USER";
+                }
                 var authToken = new UsernamePasswordAuthenticationToken(
                         username, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
                 SecurityContextHolder.getContext().setAuthentication(authToken);

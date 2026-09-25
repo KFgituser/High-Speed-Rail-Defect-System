@@ -14,7 +14,37 @@
     "title": "High-Speed Rail Line Defect Query System",
     "subtitle": "High-Speed Rail Defect Query System",
     "welcome": "Welcome, Admin",
-    "logout": "Logout"
+    "logout": "Logout",
+    "platform": "Intelligent Inspection Platform",
+    "messages": "Messages",
+    "latestAlarm": "Latest Alarm",
+    "alarmExample": "DK512+300 rail corrugation",
+    "unread": "12 unread messages",
+    "account": "Account Settings",
+    "accountInfo": "Account Information",
+    "username": "Username",
+    "role": "Role",
+    "accountHint": "Contact the system administrator to update your profile or password.",
+    "fullscreen": "Fullscreen",
+    "defaultUser": "User"
+  },
+  "nav": {
+    "overview": "Line Overview",
+    "realtime": "Live Monitoring",
+    "query": "Defect Query",
+    "2d": "2D Analysis",
+    "3d": "3D Analysis",
+    "analytics": "Data Analytics",
+    "devices": "Devices",
+    "reports": "Reports",
+    "system": "System",
+    "collapse": "Collapse"
+  },
+  "footer": {
+    "systemStatus": "System status",
+    "normal": "Normal",
+    "lastUpdated": "Last updated",
+    "currentLine": "Current line: Beijing-Shanghai HSR K0+000 ~ DK1318+000"
   },
   "common": {
     "back": "Back",
@@ -27,6 +57,9 @@
     "refreshList": "Refresh list",
     "refreshing": "Refreshing…",
     "loading": "Loading…",
+    "loadFailed": "Failed to load",
+    "noData": "No data",
+    "retry": "Retry",
     "running": "Running…",
     "done": "Done",
     "success": "Done",
@@ -44,6 +77,11 @@
     "selectedHint": "Selected: Ctrl + Click to toggle, Shift + Click for range",
     "generating": "Generating…",
     "export": "Export"
+  },
+  "errorBoundary": {
+    "title": "This page is temporarily unavailable",
+    "message": "An unexpected error occurred. Please try again.",
+    "retry": "Reload page"
   },
   "severity": {
     "severe": "Severe",
@@ -68,7 +106,7 @@
     "passwordLabel": "Password",
     "usernamePlaceholder": "Enter username",
     "passwordPlaceholder": "Enter password",
-    "rememberMe": "Remember me",
+    "rememberMe": "Remember username",
     "forgotPassword": "Forgot password?",
     "submit": "Login",
     "recoverTitle": "Recover Password",
@@ -154,6 +192,7 @@
     "fieldSeverity": "Severity",
     "photos": "Photos",
     "photoPreview": "Photo preview",
+    "noPhotos": "No site photos are linked to this defect",
     "suggestion": "Recommendation",
     "history": "History",
     "modalClose": "Close",
@@ -164,6 +203,7 @@
     "filenameDetection": "detection-data.xlsx",
     "filenameLedger": "ledger-data.xlsx",
     "filenameAll": "all-data.xlsx",
+    "filenameDetail": "defect-detail-{{id}}.xlsx",
     "closeAria": "Close"
   },
   "viz2d": {
@@ -215,6 +255,8 @@
     "scatterTitle": "3D Scatter",
     "ampTitle": "3D Amplitude",
     "generating": "Generating 3D image...",
+    "generateFailed": "Failed to generate the 3D image. Please retry.",
+    "generateTimeout": "3D image generation timed out. Please retry.",
     "noImage": "No 3D image",
     "date": "Recorded at",
     "location": "Location range",
@@ -223,6 +265,7 @@
     "ampGenerating": "Generating 3D amplitude...",
     "ampGenerate": "Generate 3D amplitude",
     "ampGenerateFailed": "Failed to generate 3D amplitude",
+    "ampGenerateTimeout": "3D amplitude generation timed out. Please retry.",
     "downloadFailed": "Download failed",
     "downloadFailedStatus": "Download failed: HTTP {{status}}",
     "scatterItemTitle": "Scatter",

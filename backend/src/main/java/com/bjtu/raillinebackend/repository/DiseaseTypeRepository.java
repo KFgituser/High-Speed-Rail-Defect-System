@@ -1,6 +1,6 @@
 package com.bjtu.raillinebackend.repository;
 
-import com.bjtu.raillinebackend.entity.diseaseType;
+import com.bjtu.raillinebackend.entity.DiseaseType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -8,9 +8,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface DiseaseTypeRepository extends JpaRepository<diseaseType, Long>, JpaSpecificationExecutor<diseaseType> {
+public interface DiseaseTypeRepository extends JpaRepository<DiseaseType, Long>, JpaSpecificationExecutor<DiseaseType> {
 
-    List<diseaseType> findByName(String name);
-    List<diseaseType> findByCode(String code);
+    List<DiseaseType> findByName(String name);
+    List<DiseaseType> findByCode(String code);
 
 }

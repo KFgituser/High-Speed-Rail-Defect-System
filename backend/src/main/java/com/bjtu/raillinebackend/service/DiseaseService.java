@@ -1,7 +1,7 @@
 package com.bjtu.raillinebackend.service;
 
 import com.bjtu.raillinebackend.dto.DiseaseQueryRequest;
-import com.bjtu.raillinebackend.entity.diseaseType;
+import com.bjtu.raillinebackend.entity.DiseaseType;
 import com.bjtu.raillinebackend.repository.DiseaseTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -18,7 +18,7 @@ public class DiseaseService {
 
     private final DiseaseTypeRepository diseaseRepository;
 
-    public Page<diseaseType> search(DiseaseQueryRequest req) {
+    public Page<DiseaseType> search(DiseaseQueryRequest req) {
         // 1) 排序
         Sort.Direction dir = "ASC".equalsIgnoreCase(req.getSortDir()) ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sort = Sort.by(dir, req.getSortBy() == null ? "detectedAt" : req.getSortBy());
@@ -29,7 +29,7 @@ public class DiseaseService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         // 3) 条件（Specification）
-        Specification<diseaseType> spec = (root, query, cb) -> {
+        Specification<DiseaseType> spec = (root, query, cb) -> {
             List<Predicate> ps = new ArrayList<>();
 
             if (req.getLineName() != null && !req.getLineName().isBlank()) {
@@ -64,12 +64,12 @@ public class DiseaseService {
         return diseaseRepository.findAll(spec, pageable);
     }
 
-    public diseaseType getById(Long id) {
+    public DiseaseType getById(Long id) {
         return diseaseRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Disease not found: " + id));
     }
 
-    public diseaseType save(diseaseType d) {
+    public DiseaseType save(DiseaseType d) {
         return diseaseRepository.save(d);
     }
 

@@ -7,6 +7,8 @@ import Query from './components/Query.jsx';
 import Visualization2DPage from './components/Visualization2DPage.jsx';
 import Visualization3DPage from './components/Visualization3DPage.jsx';
 import BackToTop from './components/BackToTop.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
+import AppErrorBoundary from './components/AppErrorBoundary.jsx';
 
 function useTitle() {
   const location = useLocation();
@@ -36,20 +38,21 @@ function useTitle() {
 
 export default function App() {
   useTitle();
+  const { t } = useTranslation();
 
   return (
-    <>
+    <AppErrorBoundary title={t('errorBoundary.title')} message={t('errorBoundary.message')} retry={t('errorBoundary.retry')}>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<DashboardHome />} />
-        <Route path="/query" element={<Query />} />
-        <Route path="/visualization/2d" element={<Visualization2DPage />} />
-        <Route path="/visualization/2d/:id" element={<Visualization2DPage />} />
-        <Route path="/visualization/3d" element={<Visualization3DPage />} />
-        <Route path="/visualization/3d/:id" element={<Visualization3DPage />} />
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardHome /></ProtectedRoute>} />
+        <Route path="/query" element={<ProtectedRoute><Query /></ProtectedRoute>} />
+        <Route path="/visualization/2d" element={<ProtectedRoute><Visualization2DPage /></ProtectedRoute>} />
+        <Route path="/visualization/2d/:id" element={<ProtectedRoute><Visualization2DPage /></ProtectedRoute>} />
+        <Route path="/visualization/3d" element={<ProtectedRoute><Visualization3DPage /></ProtectedRoute>} />
+        <Route path="/visualization/3d/:id" element={<ProtectedRoute><Visualization3DPage /></ProtectedRoute>} />
         <Route path="*" element={<div>404</div>} />
       </Routes>
       <BackToTop />
-    </>
+    </AppErrorBoundary>
   );
 }

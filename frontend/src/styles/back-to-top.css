@@ -8,16 +8,18 @@
   border-radius: 9999px;
   display: grid;
   place-items: center;
-  background: rgba(0, 0, 0, 0.7);
+  background: linear-gradient(145deg, rgba(27, 142, 255, 0.96), rgba(6, 88, 188, 0.96));
   color: #fff;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(93, 194, 255, 0.58);
+  box-shadow: 0 0 18px rgba(18, 147, 255, 0.34), 0 8px 22px rgba(0, 9, 30, 0.34);
   cursor: pointer;
   z-index: 2147483647;
   backdrop-filter: saturate(180%) blur(6px);
 }
 
 .back-to-top:hover {
-  background: rgba(0, 0, 0, 0.8);
+  background: linear-gradient(145deg, rgba(48, 164, 255, 1), rgba(9, 106, 218, 1));
+  box-shadow: 0 0 24px rgba(31, 161, 255, 0.48), 0 10px 26px rgba(0, 9, 30, 0.38);
 }
 
 .back-to-top:active {
@@ -25,11 +27,24 @@
 }
 
 .back-to-top:focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid #71d7ff;
   outline-offset: 2px;
 }
 
 .back-to-top svg {
   pointer-events: none;
   fill: currentColor;
+}
+
+html[data-theme='light'] .back-to-top {
+  color: #0d679f;
+  border-color: rgba(36, 127, 188, 0.44);
+  background: rgba(248, 253, 255, 0.94);
+  box-shadow: 0 8px 22px rgba(46, 97, 135, 0.2);
+}
+
+html[data-theme='light'] .back-to-top:hover {
+  color: #fff;
+  background: linear-gradient(145deg, #2891ce, #176aa6);
+  box-shadow: 0 10px 26px rgba(42, 119, 171, 0.26);
 }

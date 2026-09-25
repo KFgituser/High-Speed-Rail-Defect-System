@@ -1,7 +1,10 @@
 import { vi } from 'vitest';
 
 const mocks = vi.hoisted(() => {
-  const client = { get: vi.fn() };
+  const client = {
+    get: vi.fn(),
+    interceptors: { request: { use: vi.fn() }, response: { use: vi.fn() } }
+  };
   return { client, create: vi.fn(() => client) };
 });
 
@@ -22,7 +25,7 @@ describe('API client', () => {
   });
 
   it('passes detection filters as query parameters', async () => {
-    const filters = { lineId: 1, severity: 'SEVERE' };
+    const filters = { line: '京沪高铁', types: '裂纹,破损', minMileage: 500123, maxMileage: 820456 };
     mocks.client.get.mockResolvedValue({ data: [] });
 
     await getDetections(filters);

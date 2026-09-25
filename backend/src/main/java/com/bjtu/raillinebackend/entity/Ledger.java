@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @Entity(name = "ledger")
 @Table
 @lombok.Data
-public class ledger {
+public class Ledger {
     @Id
     @Column(name = "id")
     private String id;
@@ -25,8 +25,9 @@ public class ledger {
     @Column(name = "record_date")
     private LocalDate recordDate;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "severity")
-    private String severity;
+    private Severity severity;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;

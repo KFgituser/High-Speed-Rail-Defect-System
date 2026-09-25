@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../api/index.js';
+import { openAuthorizedSse } from '../api/sse.js';
 import { resolveCurrentLang } from '../i18n/index.js';
 import AppLayout from './AppLayout.jsx';
 import '../styles/visualization-3d.css';
@@ -13,13 +14,17 @@ const getLabels = (t) => ({
   scatterTitle: t('viz3d.scatterTitle'),
   ampTitle: t('viz3d.ampTitle'),
   generating: t('viz3d.generating'),
+  generateFailed: t('viz3d.generateFailed'),
+  generateTimeout: t('viz3d.generateTimeout'),
   noImage: t('viz3d.noImage'),
   date: t('viz3d.date'),
   location: t('viz3d.location'),
   download: t('viz3d.download'),
   noDownload: t('viz3d.noDownload'),
   ampGenerating: t('viz3d.ampGenerating'),
-  ampGenerate: t('viz3d.ampGenerate')
+  ampGenerate: t('viz3d.ampGenerate'),
+  ampGenerateFailed: t('viz3d.ampGenerateFailed'),
+  ampGenerateTimeout: t('viz3d.ampGenerateTimeout')
 });
 
 const scatterSlotTitle = (index) => `Slot${index + 1} Scatter`;
@@ -30,9 +35,12 @@ export default function Visualization3DPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const apiBase = useMemo(() => import.meta.env.VITE_API_BASE || 'http://localhost:8080/api', []);
+  const apiBase = useMemo(() => import.meta.env.VITE_API_BASE || '/api', []);
   const getActiveLang = useCallback(() => resolveCurrentLang(i18n), [i18n]);
-  const backendOrigin = useMemo(() => new URL(apiBase).origin, [apiBase]);
+  const backendOrigin = useMemo(
+    () => apiBase.startsWith('http') ? new URL(apiBase).origin : window.location.origin,
+    [apiBase]
+  );
   const labels = useMemo(() => getLabels(t), [t]);
 
   const [runningSlotId, setRunningSlotId] = useState(null);
@@ -50,6 +58,7 @@ export default function Visualization3DPage() {
   const esRef = useRef(null);
   const esAmpRef = useRef(null);
   const poll3DRef = useRef(null);
+  const poll3DAmpRef = useRef(null);
 
   useEffect(() => {
     setComparisonItems((prev) =>
@@ -146,6 +155,10 @@ export default function Visualization3DPage() {
       esAmpRef.current.close();
       esAmpRef.current = null;
     }
+    if (poll3DAmpRef.current) {
+      clearInterval(poll3DAmpRef.current);
+      poll3DAmpRef.current = null;
+    }
   }, []);
 
   const updateItem = useCallback((slotId, updater) => {
@@ -203,42 +216,17 @@ export default function Visualization3DPage() {
 
   const handleDone = useCallback(
     async (slotId) => {
-      setRunStatus('success');
       cleanupSse();
-      await loadLatest3D(slotId);
-      setRunningSlotId(null);
+      try {
+        await loadLatest3D(slotId);
+        setRunStatus('success');
+        setRunningSlotId(null);
+      } catch (error) {
+        console.error('[3D] loading generated image failed', error);
+        setRunStatus('error');
+      }
     },
     [cleanupSse, loadLatest3D]
-  );
-
-  const handleSseLine = useCallback(
-    async (line, slotId) => {
-      const text = (line || '').trim();
-      if (!text) return;
-
-      if (text.startsWith('DONE')) {
-        await handleDone(slotId);
-        return;
-      }
-
-      if (text.startsWith('ERROR')) {
-        setRunStatus('error');
-        return;
-      }
-
-      if (text.startsWith('EXIT')) {
-        const match = text.match(/^EXIT\s+(-?\d+)/i);
-        const code = match ? parseInt(match[1], 10) : 1;
-        setRunStatus(code === 0 ? 'success' : 'error');
-        cleanupSse();
-        if (code === 0) {
-          await loadLatest3D(slotId);
-        }
-        setRunningSlotId(null);
-        return;
-      }
-    },
-    [cleanupSse, handleDone, loadLatest3D]
   );
 
   const watch3D = useCallback(
@@ -247,84 +235,65 @@ export default function Visualization3DPage() {
       setRunningSlotId(slotId);
       setRunStatus('running');
 
+      let settled = false;
+      let pollFailures = 0;
+      const settle = async (status) => {
+        if (settled) return;
+        settled = true;
+        if (status === 'success') {
+          await handleDone(slotId);
+        } else {
+          setRunStatus(status === 'timeout' ? 'timeout' : 'error');
+          cleanupSse();
+        }
+      };
+
       const url = `${apiBase}/viz/run3d/stream?runUuid=${encodeURIComponent(runUuid)}`;
-      esRef.current = new EventSource(url, { withCredentials: true });
-
-      esRef.current.onmessage = (event) => {
-        const line = event.data || '';
-        handleSseLine(line, slotId);
-      };
-
-      esRef.current.addEventListener('log', (event) => {
-        const line = event.data || '';
-        console.log('[3D][log]', line);
-        handleSseLine(line, slotId);
+      esRef.current = openAuthorizedSse(url, {
+        onEvent: async ({ event, data }) => {
+          if (event === 'done') {
+            await settle(data);
+            return;
+          }
+          if (event === 'log') console.log('[3D][log]', data || '');
+        },
+        onError: (error) => {
+          console.error('[3D] SSE error', error);
+          esRef.current?.close();
+          esRef.current = null;
+        }
       });
-
-      esRef.current.addEventListener('done', async (event) => {
-        const line = event.data || 'DONE';
-        await handleDone(slotId);
-        console.log('[3D][done]', line);
-      });
-
-      esRef.current.onerror = (event) => {
-        console.error('[3D] SSE error', event);
-        cleanupSse();
-      };
 
       poll3DRef.current = setInterval(async () => {
         try {
-          const data = await loadLatest3D(slotId);
-          if (data?.imageUrl) {
-            setRunStatus('success');
-            setRunningSlotId(null);
-            cleanupSse();
+          const { data } = await api.get('/viz/run3d/status', { params: { runUuid } });
+          pollFailures = 0;
+          if (['success', 'error', 'timeout'].includes(data?.status)) {
+            await settle(data.status);
           }
         } catch (error) {
-          console.warn('[3D] latest polling failed', error);
+          console.warn('[3D] status polling failed', error);
+          pollFailures += 1;
+          if (pollFailures >= 3) await settle('error');
         }
       }, 1500);
     },
-    [apiBase, cleanupSse, handleDone, handleSseLine, loadLatest3D]
+    [apiBase, cleanupSse, handleDone]
   );
 
   const handleAmpDone = useCallback(
     async (slotId) => {
-      setRunStatusAmp('success');
       cleanupSseAmp();
-      await loadLatest3DAmp(slotId);
-      setRunningSlotIdAmp(null);
+      try {
+        await loadLatest3DAmp(slotId);
+        setRunStatusAmp('success');
+        setRunningSlotIdAmp(null);
+      } catch (error) {
+        console.error('[3D-AMP] loading generated image failed', error);
+        setRunStatusAmp('error');
+      }
     },
     [cleanupSseAmp, loadLatest3DAmp]
-  );
-
-  const handleAmpSseLine = useCallback(
-    async (line, slotId) => {
-      const text = (line || '').trim();
-      if (!text) return;
-
-      if (text.startsWith('DONE')) {
-        await handleAmpDone(slotId);
-        return;
-      }
-
-      if (text.startsWith('ERROR')) {
-        setRunStatusAmp('error');
-        return;
-      }
-
-      if (text.startsWith('EXIT')) {
-        const match = text.match(/^EXIT\s+(-?\d+)/i);
-        const code = match ? parseInt(match[1], 10) : 1;
-        setRunStatusAmp(code === 0 ? 'success' : 'error');
-        cleanupSseAmp();
-        if (code === 0) {
-          await loadLatest3DAmp(slotId);
-        }
-        setRunningSlotIdAmp(null);
-      }
-    },
-    [cleanupSseAmp, handleAmpDone, loadLatest3DAmp]
   );
 
   const watch3DAmp = useCallback(
@@ -333,30 +302,50 @@ export default function Visualization3DPage() {
       setRunningSlotIdAmp(slotId);
       setRunStatusAmp('running');
 
+      let settled = false;
+      let pollFailures = 0;
+      const settle = async (status) => {
+        if (settled) return;
+        settled = true;
+        if (status === 'success') {
+          await handleAmpDone(slotId);
+        } else {
+          setRunStatusAmp(status === 'timeout' ? 'timeout' : 'error');
+          cleanupSseAmp();
+        }
+      };
+
       const url = `${apiBase}/viz/run3damp/stream?runUuid=${encodeURIComponent(runUuid)}`;
-      esAmpRef.current = new EventSource(url, { withCredentials: true });
-
-      esAmpRef.current.onmessage = (event) => {
-        const line = event.data || '';
-        handleAmpSseLine(line, slotId);
-      };
-
-      esAmpRef.current.addEventListener('log', (event) => {
-        console.log('[3D-AMP][log]', event.data || '');
+      esAmpRef.current = openAuthorizedSse(url, {
+        onEvent: async ({ event, data }) => {
+          if (event === 'done') {
+            await settle(data);
+            return;
+          }
+          if (event === 'log') console.log('[3D-AMP][log]', data || '');
+        },
+        onError: (error) => {
+          console.error('[3D-AMP] SSE error', error);
+          esAmpRef.current?.close();
+          esAmpRef.current = null;
+        }
       });
 
-      esAmpRef.current.addEventListener('done', async () => {
-        await handleAmpDone(slotId);
-      });
-
-      esAmpRef.current.onerror = (event) => {
-        console.error('[3D-AMP] SSE error', event);
-        setRunStatusAmp('error');
-        cleanupSseAmp();
-        setRunningSlotIdAmp(null);
-      };
+      poll3DAmpRef.current = setInterval(async () => {
+        try {
+          const { data } = await api.get('/viz/run3damp/status', { params: { runUuid } });
+          pollFailures = 0;
+          if (['success', 'error', 'timeout'].includes(data?.status)) {
+            await settle(data.status);
+          }
+        } catch (error) {
+          console.warn('[3D-AMP] status polling failed', error);
+          pollFailures += 1;
+          if (pollFailures >= 3) await settle('error');
+        }
+      }, 1500);
     },
-    [apiBase, cleanupSseAmp, handleAmpDone, handleAmpSseLine]
+    [apiBase, cleanupSseAmp, handleAmpDone]
   );
 
   const generate3DAmplitude = useCallback(
@@ -442,7 +431,11 @@ export default function Visualization3DPage() {
             <div className="view-container" key={`scatter-${index}`}>
               <h3>{item.title}</h3>
               <div className="image-container">
-                {isSlotRunning(index + 1) ? (
+                {runningSlotId === index + 1 && ['error', 'timeout'].includes(runStatus) ? (
+                  <div className="image-placeholder" role="alert">
+                    {runStatus === 'timeout' ? labels.generateTimeout : labels.generateFailed}
+                  </div>
+                ) : isSlotRunning(index + 1) ? (
                   <div className="image-placeholder loading">{labels.generating}</div>
                 ) : item.image ? (
                   <div className="scatter-image-frame">
@@ -483,7 +476,11 @@ export default function Visualization3DPage() {
             <div className="view-container" key={`amp-${index}`}>
               <h3>{item.title}</h3>
               <div className="image-container">
-                {isAmpSlotRunning(index + 1) ? (
+                {runningSlotIdAmp === index + 1 && ['error', 'timeout'].includes(runStatusAmp) ? (
+                  <div className="image-placeholder" role="alert">
+                    {runStatusAmp === 'timeout' ? labels.ampGenerateTimeout : labels.ampGenerateFailed}
+                  </div>
+                ) : isAmpSlotRunning(index + 1) ? (
                   <div className="image-placeholder loading">{labels.ampGenerating}</div>
                 ) : item.image ? (
                   <img src={item.image} alt={item.title} className="visualization-image" />

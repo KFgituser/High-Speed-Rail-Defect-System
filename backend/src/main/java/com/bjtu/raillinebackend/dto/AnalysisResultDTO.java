@@ -1,14 +1,26 @@
 package com.bjtu.raillinebackend.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.Map;
 
-// dto/AnalysisResultDTO.java
 @Data
 public class AnalysisResultDTO {
-    private Integer slotId;                         // 1~4
-    private Map<String, Integer> metrics;           // {"total":8,"破损":0,"裂纹":0,"冒浆":8}
-    private String analyzedAt;                      // ISO字符串或 "yyyy-MM-dd HH:mm:ss"
+    @NotNull(message = "slotId is required")
+    @Min(value = 1, message = "slotId must be between 1 and 4")
+    @Max(value = 4, message = "slotId must be between 1 and 4")
+    private Integer slotId;
+
+    @NotEmpty(message = "metrics must not be empty")
+    private Map<@Size(max = 50, message = "metric name must not exceed 50 characters") String,
+            @NotNull(message = "metric value is required") @PositiveOrZero(message = "metric value must not be negative") Integer> metrics;
+
+    private String analyzedAt;
     private String runId;
 }

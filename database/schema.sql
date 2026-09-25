@@ -102,3 +102,13 @@ CREATE TABLE IF NOT EXISTS viz_defect (
   cls VARCHAR(50) NOT NULL,
   INDEX idx_run_uuid (run_uuid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS viz3d_result (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  slot_id INT,
+  run_uuid VARCHAR(255),
+  image_url VARCHAR(512),
+  start_label VARCHAR(255),
+  end_label VARCHAR(255),
+  created_at DATETIME
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

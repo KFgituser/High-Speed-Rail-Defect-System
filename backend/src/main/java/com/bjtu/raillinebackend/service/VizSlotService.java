@@ -1,8 +1,11 @@
 package com.bjtu.raillinebackend.service;
 
 import com.bjtu.raillinebackend.entity.Viz2DSlot;
+import com.bjtu.raillinebackend.dto.Viz2DSlotResponse;
+import com.bjtu.raillinebackend.dto.Viz2DSlotUpdateRequest;
 import com.bjtu.raillinebackend.repository.VizSlotRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,10 +33,19 @@ public class VizSlotService {
 
     public VizSlotService(VizSlotRepository repo) { this.repo = repo; }
 
-    public List<Viz2DSlot> getAll() { return repo.findAllByOrderBySlotIdAsc(); }
+    public List<Viz2DSlotResponse> getAll() {
+        return repo.findAllByOrderBySlotIdAsc().stream().map(this::toResponse).toList();
+    }
 
-    public Viz2DSlot updateSlot(Integer slotId, Viz2DSlot slot) {
+    @Transactional
+    public Viz2DSlotResponse updateSlot(Integer slotId, Viz2DSlotUpdateRequest request) {
+        Viz2DSlot slot = repo.findBySlotId(slotId).orElseGet(Viz2DSlot::new);
         slot.setSlotId(slotId);
+        slot.setRunId(request.runId());
+        slot.setImagePath(request.imagePath());
+        slot.setDateStr(request.dateStr());
+        slot.setStartLabel(request.startLabel());
+        slot.setEndLabel(request.endLabel());
 
         // 如果前端传的是“当前产物”路径，则自动做一次快照，避免四槽位都指向同一文件
         String path = slot.getImagePath();
@@ -50,13 +62,15 @@ public class VizSlotService {
             }
         }
 
-        return repo.save(slot);   // upsert
+        return toResponse(repo.save(slot));   // upsert
     }
 
+    @Transactional
     public void clearSlot(Integer slotId) { repo.deleteById(slotId); }
 
     /** 新增：显式“把当前结果快照到槽位”并回填时间/区间等字段 */
-    public Viz2DSlot snapshotCurrent2dToSlot(int slotId) throws IOException {
+    @Transactional
+    public Viz2DSlotResponse snapshotCurrent2dToSlot(int slotId) throws IOException {
         Files.createDirectories(SNAP_DIR);
         // 1) 复制三个产物
         SnapshotResult r = snapshotFiles(slotId);
@@ -78,7 +92,7 @@ public class VizSlotService {
         entity.setStartLabel(startLabel);
         entity.setEndLabel(endLabel);
 
-        return repo.save(entity);
+        return toResponse(repo.save(entity));
     }
 
     /* ---------- 私有辅助 ---------- */
@@ -193,5 +207,10 @@ public class VizSlotService {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private Viz2DSlotResponse toResponse(Viz2DSlot slot) {
+        return new Viz2DSlotResponse(slot.getSlotId(), slot.getRunId(), slot.getImagePath(), slot.getDateStr(),
+                slot.getStartLabel(), slot.getEndLabel(), slot.getUpdatedAt());
     }
 }

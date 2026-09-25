@@ -2,8 +2,13 @@ package com.bjtu.raillinebackend.service;
 
 
 import com.bjtu.raillinebackend.dto.LatestVizResponse;
+import com.bjtu.raillinebackend.dto.Viz3DJobStatusResponse;
+import com.bjtu.raillinebackend.exception.ResourceNotFoundException;
 import com.bjtu.raillinebackend.repository.VizSlotRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -15,13 +20,17 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import jakarta.annotation.PreDestroy;
 
 @Service
 public class VizRun3DAmpService {
     private final VizSlotRepository slotRepository;
+    private final AsyncTaskExecutor visualizationTaskExecutor;
 
-    public VizRun3DAmpService(VizSlotRepository slotRepository) {
+    public VizRun3DAmpService(VizSlotRepository slotRepository,
+                              @Qualifier("visualizationTaskExecutor") AsyncTaskExecutor visualizationTaskExecutor) {
         this.slotRepository = slotRepository;
+        this.visualizationTaskExecutor = visualizationTaskExecutor;
     }
 
     @Value("${viz3damp.python}")
@@ -36,11 +45,26 @@ public class VizRun3DAmpService {
     @Value("${viz3damp.base-out-dir}")
     private String baseOutDir;
 
-    private final ExecutorService pool = Executors.newFixedThreadPool(4);
+    @Value("${app.visualization.sse-timeout-ms:900000}")
+    private long sseTimeoutMs;
+
+    @Value("${viz3d.buffer-lines:500}")
+    private int maxBufferedLogLines;
+
+    @Value("${app.visualization.completed-job-retention-ms:3600000}")
+    private long completedJobRetentionMs;
+
+    @Value("${app.visualization.process-timeout-ms:300000}")
+    private long processTimeoutMs;
 
     private final ConcurrentHashMap<Integer, AtomicBoolean> slotRunning = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, JobCtx> jobs = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Integer, LatestVizResponse> latestBySlot = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService timeoutScheduler = Executors.newSingleThreadScheduledExecutor(task -> {
+        Thread thread = new Thread(task, "viz3damp-timeout");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -56,13 +80,19 @@ public class VizRun3DAmpService {
         ctx.lang = normalizeLang(lang);
         jobs.put(runUuid, ctx);
 
-        pool.submit(() -> runPython(ctx));
+        try {
+            visualizationTaskExecutor.submit(() -> runPython(ctx));
+        } catch (RuntimeException exception) {
+            jobs.remove(runUuid);
+            slotRunning.get(slotId).set(false);
+            throw new IllegalStateException("Visualization task queue is full", exception);
+        }
         return runUuid;
     }
 
     public SseEmitter stream(String runUuid) {
         JobCtx ctx = jobs.get(runUuid);
-        SseEmitter emitter = new SseEmitter(0L);
+        SseEmitter emitter = new SseEmitter(sseTimeoutMs);
 
         if (ctx == null) {
             try {
@@ -80,7 +110,7 @@ public class VizRun3DAmpService {
             try { emitter.send(SseEmitter.event().name("log").data(line)); } catch (Exception ignored) {}
         }
         if (ctx.done) {
-            try { emitter.send(SseEmitter.event().name("done").data("DONE")); } catch (Exception ignored) {}
+            try { emitter.send(SseEmitter.event().name("done").data(ctx.status)); } catch (Exception ignored) {}
             emitter.complete();
         }
 
@@ -89,6 +119,12 @@ public class VizRun3DAmpService {
         emitter.onTimeout(() -> ctx.emitter = null);
 
         return emitter;
+    }
+
+    public Viz3DJobStatusResponse status(String runUuid) {
+        JobCtx ctx = jobs.get(runUuid);
+        if (ctx == null) throw new ResourceNotFoundException("3D amplitude job", runUuid);
+        return new Viz3DJobStatusResponse(ctx.runUuid, ctx.slotId, ctx.status);
     }
 
     public LatestVizResponse latest(int slotId) {
@@ -112,6 +148,10 @@ public class VizRun3DAmpService {
 
     private void runPython(JobCtx ctx) {
         int slotId = ctx.slotId;
+        Process process = null;
+        ScheduledFuture<?> timeout = null;
+        AtomicBoolean timedOut = new AtomicBoolean(false);
+        ctx.status = "running";
         try {
             Path outDir = Path.of(baseOutDir, "slot" + slotId).toAbsolutePath().normalize();
             Files.createDirectories(outDir);
@@ -138,20 +178,30 @@ public class VizRun3DAmpService {
             env.put("MPLBACKEND", "Agg");
             env.put("PYTHONIOENCODING", "UTF-8");
             env.put("PYTHONUTF8", "1");
-            Process p = pb.start();
+            process = pb.start();
+            Process startedProcess = process;
+            timeout = timeoutScheduler.schedule(() -> {
+                if (startedProcess.isAlive()) {
+                    timedOut.set(true);
+                    startedProcess.destroyForcibly();
+                }
+            }, Math.max(1000, processTimeoutMs), TimeUnit.MILLISECONDS);
 
             try (BufferedReader br = new BufferedReader(
-                    new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = br.readLine()) != null) {
                     log(ctx, line);
                 }
             }
 
-            int code = p.waitFor();
+            int code = process.waitFor();
             log(ctx, "EXIT " + code);
 
-            if (code == 0 && Files.exists(outPng)) {
+            if (timedOut.get()) {
+                log(ctx, "ERROR 3D amplitude visualization timed out");
+                error(ctx, "timeout");
+            } else if (code == 0 && Files.exists(outPng)) {
                 LatestVizResponse latest = new LatestVizResponse();
                 latest.setImageUrl("/viz3damp-out/slot" + slotId + "/image3D_amp.png");
                 latest.setDate(LocalDateTime.now().format(DT));
@@ -160,12 +210,19 @@ public class VizRun3DAmpService {
                 done(ctx);
             } else {
                 log(ctx, "ERROR 生成失败或图片不存在: " + outPng);
-                error(ctx);
+                error(ctx, "error");
             }
         } catch (Exception e) {
-            log(ctx, "ERROR " + e.getMessage());
-            error(ctx);
+            if (timedOut.get()) {
+                log(ctx, "ERROR 3D amplitude visualization timed out");
+                error(ctx, "timeout");
+            } else {
+                log(ctx, "ERROR " + e.getMessage());
+                error(ctx, "error");
+            }
         } finally {
+            if (timeout != null) timeout.cancel(false);
+            if (process != null && process.isAlive()) process.destroyForcibly();
             slotRunning.get(slotId).set(false);
         }
     }
@@ -192,7 +249,10 @@ public class VizRun3DAmpService {
     }
 
     private void log(JobCtx ctx, String line) {
-        ctx.logBuffer.add(line);
+        ctx.logBuffer.addLast(line);
+        while (ctx.logBuffer.size() > maxBufferedLogLines) {
+            ctx.logBuffer.pollFirst();
+        }
         SseEmitter emitter = ctx.emitter;
         if (emitter != null) {
             try { emitter.send(SseEmitter.event().name("log").data(line)); }
@@ -201,20 +261,24 @@ public class VizRun3DAmpService {
     }
 
     private void done(JobCtx ctx) {
+        ctx.status = "success";
         ctx.done = true;
+        ctx.completedAt = System.currentTimeMillis();
         if (ctx.emitter != null) {
-            try { ctx.emitter.send(SseEmitter.event().name("done").data("DONE")); }
+            try { ctx.emitter.send(SseEmitter.event().name("done").data(ctx.status)); }
             catch (Exception ignored) {}
             ctx.emitter.complete();
         }
     }
 
-    private void error(JobCtx ctx) {
+    private void error(JobCtx ctx, String status) {
+        ctx.status = status;
         ctx.done = true;
+        ctx.completedAt = System.currentTimeMillis();
         if (ctx.emitter != null) {
             try {
                 ctx.emitter.send(SseEmitter.event().name("log").data("ERROR"));
-                ctx.emitter.send(SseEmitter.event().name("done").data("DONE"));
+                ctx.emitter.send(SseEmitter.event().name("done").data(ctx.status));
             } catch (Exception ignored) {}
             ctx.emitter.complete();
         }
@@ -224,13 +288,26 @@ public class VizRun3DAmpService {
         final String runUuid;
         final int slotId;
         String lang = "zh";
+        volatile String status = "queued";
         volatile SseEmitter emitter;
-        final List<String> logBuffer = new CopyOnWriteArrayList<>();
+        final Deque<String> logBuffer = new ConcurrentLinkedDeque<>();
         volatile boolean done = false;
+        volatile long completedAt;
 
         JobCtx(String runUuid, int slotId) {
             this.runUuid = runUuid;
             this.slotId = slotId;
         }
+    }
+
+    @Scheduled(fixedDelayString = "${app.visualization.completed-job-cleanup-interval-ms:300000}")
+    void removeExpiredJobs() {
+        long cutoff = System.currentTimeMillis() - completedJobRetentionMs;
+        jobs.entrySet().removeIf(entry -> entry.getValue().done && entry.getValue().completedAt < cutoff);
+    }
+
+    @PreDestroy
+    void shutdownTimeoutScheduler() {
+        timeoutScheduler.shutdownNow();
     }
 }

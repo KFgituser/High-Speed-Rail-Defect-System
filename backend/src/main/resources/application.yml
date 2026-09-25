@@ -1,49 +1,73 @@
-server:
-  port: ${SERVER_PORT:8080}
-
 spring:
   datasource:
     url: ${DB_URL:jdbc:mysql://localhost:3306/railline?sslMode=DISABLED&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=utf8}
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
-      connection-timeout: ${DB_CONNECTION_TIMEOUT:10000}
-      validation-timeout: ${DB_VALIDATION_TIMEOUT:5000}
-      maximum-pool-size: ${DB_MAX_POOL_SIZE:5}
-      keepalive-time: ${DB_KEEPALIVE_TIME:300000}
-
+      connection-timeout: 10000
+      validation-timeout: 5000
+      maximum-pool-size: 5
+      keepalive-time: 300000
   jpa:
     hibernate:
-      ddl-auto: ${JPA_DDL_AUTO:none}
+      ddl-auto: none
 
   web:
     resources:
+      # 让静态目录直接可访问（/thumbs/** 和 /plots/**）
       static-locations:
-        - file:${VIZ_RUNS_DIR:./runs}/
-        - file:${VIZ_OUTPUT_DIR:./output}/
+        - file:${JH_CODEBASE_DIR:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦}/output/3Doutput/  # 3D 输出路径
+        - file:${JH_CODEBASE_DIR:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦}/output/   # 把最终图/快照对外可访问
+
 
 viz:
-  python: ${VIZ_PYTHON:C:/Python313/python.exe}
-  script2d: ${VIZ_SCRIPT_2D:../python-analysis/scripts/front_side_2D.py}
-  script3d: ${VIZ_SCRIPT_3D:../python-analysis/scripts/front_side_3D.py}
-  script3damp: ${VIZ_SCRIPT_3D_AMP:../python-analysis/scripts/front_side_3Damps_server.py}
-  outDir: ${VIZ_OUTPUT_DIR:./output}
-  workDir: ${VIZ_WORK_DIR:./runs}
+  python: "${PYTHON_EXE:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦/.venv/Scripts/python.exe}"
+  script2d: "${JH_CODEBASE_DIR:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦}/front_side_2D frontend.py"
+  outDir: "${JH_CODEBASE_DIR:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦}/output"       #  统一到一个明确目录
+  workDir: "${JH_CODEBASE_DIR:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦}"
+
+# 不同的顶层节点（viz3d vs viz3damp），不会重名覆盖
+viz3d:
+  base-out-dir: "${JH_CODEBASE_DIR:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦}/output/3Doutput"     # 3D 输出根目录（要映射成 /viz3d-out/**）
+  source-2d-dir: "${JH_CODEBASE_DIR:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦}/output"     # 2D 输出目录（包含 amps_stack.npy / x_labels.npy 等）
+  python: "${PYTHON_EXE:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦/.venv/Scripts/python.exe}"
+  script-path: "${JH_CODEBASE_DIR:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦}/front_side_3D frontend.py"  #  3D 脚本路径（
+  buffer-lines: 500                                        # SSE 缓冲行数（防止 stream 先连后跑/先跑后连丢日志）
+
+viz3damp:
+  python: "${PYTHON_EXE:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦/.venv/Scripts/python.exe}"
+  script-path: "${JH_CODEBASE_DIR:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦}/front_side_3Damps_server.py"
+  source-2d-dir: "${JH_CODEBASE_DIR:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦}/output"
+  base-out-dir: "${JH_CODEBASE_DIR:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦}/output/3Dampoutput"
+
 
 app:
+  visualization:
+    max-concurrent-tasks: 2
+    queue-capacity: 8
+    sse-timeout-ms: 900000
+    process-timeout-ms: 300000
+    completed-job-retention-ms: 3600000
+    completed-job-cleanup-interval-ms: 300000
+  # 数据与脚本配置（供 NpyController 使用）
   data:
-    npyDir: ${NPY_DIR:./data}
-    thumbsDir: ${THUMBS_DIR:./runs/thumbs}
-    plotsDir: ${PLOTS_DIR:./runs/plots}
+    npyDir: ${NPY_DIR:C:/Users/Administrator/Desktop/高铁DAS/JingHu_Data npy}
+    thumbsDir: ${JH_CODEBASE_DIR:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦}/runs/thumbs
+    plotsDir: ${JH_CODEBASE_DIR:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦}/runs/plots
   python:
-    exe: ${PYTHON_EXE:C:/Python313/python.exe}
-    script: ${ANALYZE_SCRIPT:../python-analysis/scripts/plot_npy.py}
+    # 这里直接用Python 解释器
+    exe: ${PYTHON_EXE:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦/.venv/Scripts/python.exe}
+    # 供 /api/analyze 调用的脚本（可换成你的算法入口）
+    script: ${JH_CODEBASE_DIR:C:/Users/Administrator/Desktop/高铁DAS/JH_Codebase王舒伦}/plot_npy.py
+
+  # JWT 配置保留
   jwt:
-    secret: ${JWT_SECRET:change-me-to-a-long-random-secret-at-least-32-bytes}
-    expire-minutes: ${JWT_EXPIRE_MINUTES:120}
+    secret: "${APP_JWT_SECRET:}"
+    expire-minutes: 120
+    issuer: "${APP_JWT_ISSUER:rail-line-backend}"
 
 logging:
   level:
-    root: ${LOG_LEVEL_ROOT:INFO}
-    com.bjtu.raillinebackend: ${LOG_LEVEL_APP:DEBUG}
+    root: INFO  # 设置根日志级别
+    com.bjtu.raillinebackend: DEBUG  # 设置指定包的日志级别

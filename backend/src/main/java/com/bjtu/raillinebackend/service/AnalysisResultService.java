@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -22,9 +23,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AnalysisResultService {
     private final AnalysisResultRepo repo;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper;
     // 系统按中国时间，用 Asia/Shanghai；否则用 systemDefault()
     private static final ZoneId STORE_ZONE = ZoneId.of("Asia/Shanghai");
+    @Transactional
     public AnalysisResult save(AnalysisResultDTO dto) {
         AnalysisResult e = new AnalysisResult();
         e.setSlotId(dto.getSlotId());
@@ -52,6 +54,7 @@ public class AnalysisResultService {
             return LocalDateTime.parse(s, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         }
     }
+    @Transactional(readOnly = true)
     public Optional<AnalysisResultDTO> latest(Integer slotId) {
         return repo.findTopBySlotIdOrderByAnalyzedAtDesc(slotId).map(e -> {
             AnalysisResultDTO dto = new AnalysisResultDTO();

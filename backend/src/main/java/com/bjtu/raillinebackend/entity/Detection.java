@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Entity(name = "detection")
 @Table
 @lombok.Data
-public class detection {
+public class Detection {
     @Id
     @Column(name = "id")
     private String id;
@@ -28,8 +28,9 @@ public class detection {
     @Column(name = "detect_date")
     private LocalDate detectDate;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "severity")
-    private String severity;
+    private Severity severity;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;

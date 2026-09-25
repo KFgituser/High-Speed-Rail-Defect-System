@@ -4,10 +4,10 @@ services:
     container_name: rail-defect-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rail_defect_root}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-railline}
-      MYSQL_USER: ${MYSQL_USER:-rail_user}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-rail_password}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "${MYSQL_PORT:-3306}:3306"
     volumes:
@@ -33,23 +33,27 @@ services:
     environment:
       SERVER_PORT: 8080
       DB_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-railline}?sslMode=DISABLED&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=utf8
-      DB_USERNAME: ${MYSQL_USER:-rail_user}
-      DB_PASSWORD: ${MYSQL_PASSWORD:-rail_password}
-      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-long-random-secret-at-least-32-bytes}
+      DB_USERNAME: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      APP_JWT_SECRET: ${APP_JWT_SECRET}
+      APP_JWT_ISSUER: rail-line-backend
+      INIT_ADMIN_ENABLED: ${INIT_ADMIN_ENABLED:-true}
+      INIT_ADMIN_USERNAME: ${INIT_ADMIN_USERNAME}
+      INIT_ADMIN_PASSWORD: ${INIT_ADMIN_PASSWORD}
       PYTHON_EXE: /opt/venv/bin/python
-      VIZ_PYTHON: /opt/venv/bin/python
-      ANALYZE_SCRIPT: /analysis/scripts/plot_npy.py
-      VIZ_SCRIPT_2D: /analysis/scripts/front_side_2D.py
-      VIZ_SCRIPT_3D: /analysis/scripts/front_side_3D.py
-      VIZ_SCRIPT_3D_AMP: /analysis/scripts/front_side_3Damps_server.py
-      VIZ_OUTPUT_DIR: /app/output
-      VIZ_RUNS_DIR: /app/runs
+      JH_CODEBASE_DIR: /external/jh-codebase
+      NPY_DIR: /external/npy
+      PYTHONPATH: /external/jh-codebase
     ports:
       - "${BACKEND_PORT:-8080}:8080"
     volumes:
-      - ../python-analysis/scripts:/analysis/scripts:ro
-      - rail_defect_output:/app/output
-      - rail_defect_runs:/app/runs
+      - type: bind
+        source: ${JH_CODEBASE_HOST_DIR:-../python-analysis/scripts}
+        target: /external/jh-codebase
+      - type: bind
+        source: ${NPY_HOST_DIR:-../python-analysis}
+        target: /external/npy
+        read_only: true
 
   frontend:
     build:
@@ -63,5 +67,3 @@ services:
 
 volumes:
   rail_defect_mysql:
-  rail_defect_output:
-  rail_defect_runs:

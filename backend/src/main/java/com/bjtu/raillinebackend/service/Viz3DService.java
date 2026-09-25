@@ -1,9 +1,14 @@
 package com.bjtu.raillinebackend.service;
 
 import com.bjtu.raillinebackend.dto.Viz3DLatestResponse;
+import com.bjtu.raillinebackend.dto.Viz3DJobStatusResponse;
 import com.bjtu.raillinebackend.dto.Viz3DStartRequest;
+import com.bjtu.raillinebackend.exception.ResourceNotFoundException;
 import com.bjtu.raillinebackend.repository.VizSlotRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -15,18 +20,31 @@ import java.nio.file.*;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
-import java.util.Map;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import jakarta.annotation.PreDestroy;
 
 @Service
 public class Viz3DService {
     private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final VizSlotRepository slotRepository;
+    private final AsyncTaskExecutor visualizationTaskExecutor;
 
-    public Viz3DService(VizSlotRepository slotRepository) {
+    public Viz3DService(VizSlotRepository slotRepository,
+                        @Qualifier("visualizationTaskExecutor") AsyncTaskExecutor visualizationTaskExecutor) {
         this.slotRepository = slotRepository;
+        this.visualizationTaskExecutor = visualizationTaskExecutor;
     }
 
     // ======== 按你的真实环境写死（也可改成 application.yml 配置） ========
@@ -44,60 +62,47 @@ public class Viz3DService {
     @Value("${viz3d.base-out-dir}")
     private String out3dRoot;
 
-    // ===== SSE =====
-    private final Map<String, SseEmitter> emitterMap = new ConcurrentHashMap<>();
+    @Value("${app.visualization.sse-timeout-ms:900000}")
+    private long sseTimeoutMs;
+
+    @Value("${app.visualization.process-timeout-ms:300000}")
+    private long processTimeoutMs;
+
+    @Value("${viz3d.buffer-lines:500}")
+    private int maxBufferedLogLines;
+
+    @Value("${app.visualization.completed-job-retention-ms:3600000}")
+    private long completedJobRetentionMs;
+
+    private final ConcurrentHashMap<String, JobContext> jobs = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, AtomicBoolean> slotRunning = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService timeoutScheduler = Executors.newSingleThreadScheduledExecutor(task -> {
+        Thread thread = new Thread(task, "viz3d-timeout");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     public String start3D(Viz3DStartRequest req) {
         int slotId = req.getSlotId();
         if (slotId < 1 || slotId > 4) {
             throw new IllegalArgumentException("slotId must be 1..4");
         }
+        AtomicBoolean running = slotRunning.computeIfAbsent(slotId, ignored -> new AtomicBoolean());
+        if (!running.compareAndSet(false, true)) {
+            throw new IllegalStateException("This slot already has a queued or running 3D task");
+        }
 
         String runUuid = UUID.randomUUID().toString();
-        Path runDir = Paths.get(out3dRoot).resolve("slot-" + slotId).resolve("run-" + runUuid);
-
+        JobContext job = new JobContext(runUuid, slotId);
+        jobs.put(runUuid, job);
+        log(job, "QUEUED");
         try {
-            Files.createDirectories(runDir);
-
-            // 1) 复制 2D 产物到 runDir（Python 就从 VIZ_OUT_DIR 读这些）
-            copy2dArtifactsTo(runDir, slotId);
-
-            // 2) 启动 Python
-            ProcessBuilder pb = new ProcessBuilder(
-                    pythonExe,
-                    "-u",
-                    scriptPath
-            );
-
-            pb.directory(runDir.toFile());
-
-            // 关键：合并 stderr 到 stdout，否则“脚本路径错误/依赖错误”你看不到
-            pb.redirectErrorStream(true);
-
-            Map<String, String> env = pb.environment();
-            env.put("VIZ_OUT_DIR", runDir.toString());
-            env.put("RUN_UUID", runUuid);
-            env.put("VIZ_LANG", normalizeLang(req.getLang()));
-
-            // 建议强制无界面后端（保存 png 不需要 GUI）
-            env.put("MPLBACKEND", "Agg");
-
-            // 避免中文乱码
-            env.put("PYTHONIOENCODING", "UTF-8");
-            env.put("PYTHONUTF8", "1");
-
-            sendSseLog(runUuid, "[3D] cmd=" + pb.command());
-            sendSseLog(runUuid, "[3D] workDir=" + runDir);
-            sendSseLog(runUuid, "[3D] VIZ_OUT_DIR=" + env.get("VIZ_OUT_DIR"));
-
-            Process p = pb.start();
-
-            // 3) 读日志 + 等结束（异步线程）
-            new Thread(() -> monitorProcess(p, runUuid, runDir)).start();
-
+            visualizationTaskExecutor.execute(() -> run3D(job, normalizeLang(req.getLang())));
             return runUuid;
-        } catch (Exception e) {
-            throw new RuntimeException("start3D failed: " + e.getMessage(), e);
+        } catch (RuntimeException exception) {
+            jobs.remove(runUuid);
+            running.set(false);
+            throw new IllegalStateException("Visualization task queue is full", exception);
         }
     }
 
@@ -128,69 +133,173 @@ public class Viz3DService {
         }
     }
 
-    private void monitorProcess(Process process, String runUuid, Path runDir) {
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8)
-        )) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sendSseLog(runUuid, line);
-            }
+    private void run3D(JobContext job, String lang) {
+        Process process = null;
+        ScheduledFuture<?> timeout = null;
+        AtomicBoolean timedOut = new AtomicBoolean(false);
+        String result = "error";
+        Path runDir = Paths.get(out3dRoot).resolve("slot-" + job.slotId).resolve("run-" + job.runUuid);
+        job.status = "running";
+        try {
+            Files.createDirectories(runDir);
+            copy2dArtifactsTo(runDir, job.slotId);
 
+            ProcessBuilder pb = new ProcessBuilder(pythonExe, "-u", scriptPath)
+                    .directory(runDir.toFile())
+                    .redirectErrorStream(true);
+            var env = pb.environment();
+            env.put("VIZ_OUT_DIR", runDir.toString());
+            env.put("RUN_UUID", job.runUuid);
+            env.put("VIZ_LANG", lang);
+            env.put("MPLBACKEND", "Agg");
+            env.put("PYTHONIOENCODING", "UTF-8");
+            env.put("PYTHONUTF8", "1");
+            log(job, "[3D] cmd=" + pb.command());
+            log(job, "[3D] workDir=" + runDir);
+
+            process = pb.start();
+            Process startedProcess = process;
+            timeout = timeoutScheduler.schedule(() -> {
+                if (startedProcess.isAlive()) {
+                    timedOut.set(true);
+                    startedProcess.destroyForcibly();
+                }
+            }, Math.max(1000, processTimeoutMs), TimeUnit.MILLISECONDS);
+
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    log(job, line);
+                }
+            }
             int code = process.waitFor();
-            sendSseLog(runUuid, "EXIT " + code);
-
-            // 检查输出是否存在
+            log(job, "EXIT " + code);
             Path img = runDir.resolve("image3D.png");
-            Path json = runDir.resolve("3Drun_result.json");
-            if (code == 0 && Files.exists(img)) {
-                sendSseLog(runUuid, "DONE");
+            if (timedOut.get()) {
+                result = "timeout";
+                log(job, "ERROR: 3D visualization timed out");
+            } else if (code == 0 && Files.isRegularFile(img)) {
+                result = "success";
             } else {
-                sendSseLog(runUuid, "ERROR: image3D.png not generated. imgExists=" + Files.exists(img) +
-                        ", jsonExists=" + Files.exists(json));
+                log(job, "ERROR: image3D.png not generated or process failed");
             }
-        } catch (Exception e) {
-            sendSseLog(runUuid, "ERROR monitor: " + e.getMessage());
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            log(job, "ERROR: 3D visualization interrupted");
+        } catch (Exception exception) {
+            if (timedOut.get()) {
+                result = "timeout";
+                log(job, "ERROR: 3D visualization timed out");
+            } else {
+                log(job, "ERROR: " + exception.getMessage());
+            }
         } finally {
-            completeSse(runUuid);
+            if (timeout != null) timeout.cancel(false);
+            if (process != null && process.isAlive()) process.destroyForcibly();
+            try {
+                complete(job, result);
+            } finally {
+                slotRunning.get(job.slotId).set(false);
+            }
         }
     }
 
-    // ===== SSE: Controller 会调这个 =====
-    // 监听日志流
     public SseEmitter openStream(String runUuid) {
-        if (runUuid == null || runUuid.isBlank()) {
-            throw new IllegalArgumentException("runUuid is blank");
+        JobContext job = findJob(runUuid);
+        SseEmitter emitter = new SseEmitter(sseTimeoutMs);
+        emitter.onCompletion(() -> removeEmitter(job, emitter));
+        emitter.onTimeout(() -> removeEmitter(job, emitter));
+        emitter.onError(error -> removeEmitter(job, emitter));
+        synchronized (job) {
+            try {
+                for (String line : job.logs) {
+                    emitter.send(SseEmitter.event().name("log").data(line));
+                }
+                if (job.completedAt > 0) {
+                    emitter.send(SseEmitter.event().name("done").data(job.status));
+                    emitter.complete();
+                } else {
+                    job.emitters.add(emitter);
+                }
+            } catch (IOException exception) {
+                emitter.completeWithError(exception);
+            }
         }
-
-        // 创建 SseEmitter 时指定超时为 0L，表示永不超时
-        SseEmitter emitter = emitterMap.computeIfAbsent(runUuid, k -> new SseEmitter(0L)); // 0L 防止超时
-
-        emitter.onCompletion(() -> emitterMap.remove(runUuid));
-        emitter.onTimeout(() -> emitterMap.remove(runUuid));
-        emitter.onError(e -> emitterMap.remove(runUuid));
-
         return emitter;
     }
 
-    // 发送日志消息
-    public void sendSseLog(String runUuid, String line) {
-        SseEmitter emitter = emitterMap.get(runUuid);
-        if (emitter == null) return;
-        try {
-            emitter.send(SseEmitter.event().name("log").data(line));
-        } catch (IOException ignored) {
-            emitterMap.remove(runUuid);
+    public Viz3DJobStatusResponse getStatus(String runUuid) {
+        JobContext job = findJob(runUuid);
+        return new Viz3DJobStatusResponse(job.runUuid, job.slotId, job.status);
+    }
+
+    private JobContext findJob(String runUuid) {
+        JobContext job = jobs.get(runUuid);
+        if (job == null) throw new ResourceNotFoundException("3D visualization job", runUuid);
+        return job;
+    }
+
+    private void removeEmitter(JobContext job, SseEmitter emitter) {
+        synchronized (job) {
+            job.emitters.remove(emitter);
         }
     }
 
-    public void completeSse(String runUuid) {
-        SseEmitter emitter = emitterMap.remove(runUuid);
-        if (emitter == null) return;
-        try {
-            emitter.send(SseEmitter.event().name("done").data("DONE"));
-        } catch (IOException ignored) {}
-        emitter.complete();
+    private void log(JobContext job, String line) {
+        synchronized (job) {
+            job.logs.addLast(line);
+            while (job.logs.size() > Math.max(1, maxBufferedLogLines)) job.logs.removeFirst();
+            for (SseEmitter emitter : new ArrayList<>(job.emitters)) {
+                try {
+                    emitter.send(SseEmitter.event().name("log").data(line));
+                } catch (Exception exception) {
+                    job.emitters.remove(emitter);
+                }
+            }
+        }
+    }
+
+    private void complete(JobContext job, String status) {
+        synchronized (job) {
+            job.status = status;
+            job.completedAt = System.currentTimeMillis();
+            for (SseEmitter emitter : job.emitters) {
+                try {
+                    emitter.send(SseEmitter.event().name("done").data(status));
+                } catch (Exception ignored) {
+                    // The client may have disconnected.
+                }
+                emitter.complete();
+            }
+            job.emitters.clear();
+        }
+    }
+
+    @Scheduled(fixedDelayString = "${app.visualization.completed-job-cleanup-interval-ms:300000}")
+    void removeExpiredJobs() {
+        long cutoff = System.currentTimeMillis() - completedJobRetentionMs;
+        jobs.entrySet().removeIf(entry -> entry.getValue().completedAt > 0
+                && entry.getValue().completedAt < cutoff);
+    }
+
+    @PreDestroy
+    void shutdownTimeoutScheduler() {
+        timeoutScheduler.shutdownNow();
+    }
+
+    private static final class JobContext {
+        final String runUuid;
+        final int slotId;
+        final Deque<String> logs = new ArrayDeque<>();
+        final Set<SseEmitter> emitters = new HashSet<>();
+        volatile String status = "queued";
+        volatile long completedAt;
+
+        JobContext(String runUuid, int slotId) {
+            this.runUuid = runUuid;
+            this.slotId = slotId;
+        }
     }
 
     // ===== latest：扫目录找最新 run 且必须有 image3D.png =====
@@ -198,8 +307,8 @@ public class Viz3DService {
         Path slotDir = Paths.get(out3dRoot).resolve("slot-" + slotId);
         if (!Files.isDirectory(slotDir)) return Viz3DLatestResponse.empty(slotId);
 
-        try {
-            Optional<Path> latestRun = Files.list(slotDir)
+        try (var runs = Files.list(slotDir)) {
+            Optional<Path> latestRun = runs
                     .filter(Files::isDirectory)
                     .filter(p -> p.getFileName().toString().startsWith("run-"))
                     .filter(p -> Files.exists(p.resolve("image3D.png"))) // 关键：必须有图才算最新
@@ -225,6 +334,8 @@ public class Viz3DService {
                     .orElse(null);
 
             return new Viz3DLatestResponse(slotId, runUuid, imageUrl, date, startLabel, endLabel);
+        } catch (IllegalStateException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("getLatest failed: " + e.getMessage(), e);
         }

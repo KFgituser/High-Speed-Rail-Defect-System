@@ -7,7 +7,7 @@ import lombok.Data;
 @Entity
 @Table(name = "disease_type")
 @Data
-public class diseaseType {
+public class DiseaseType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

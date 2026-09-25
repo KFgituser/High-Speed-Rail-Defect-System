@@ -1,118 +1,164 @@
 package com.bjtu.raillinebackend.controller;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import jakarta.validation.constraints.Size;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Map;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
-
+@Validated
 @RestController
 @RequestMapping("/api/viz")
 public class Viz2DStreamController {
+    @Value("${viz.python}")
+    private String pythonExe;
 
-    @Value("${viz.python}")   private String pythonExe;
-    @Value("${viz.script2d}") private String script2d;
-    @Value("${viz.workDir}")  private String workDir;
-    @Value("${viz.outDir}")   private String outDir;
-    @Value("${app.data.npyDir}") private String npyDir;
+    @Value("${viz.script2d}")
+    private String script2d;
 
-    /**
-     * 继续负责 2D 的 SSE， SSE：启动 2D 任务并实时推送日志/进度。
-     * 支持 ?file=xxx.npy（仅处理单个文件）；不带则处理整个目录。
-     * 前端示例：
-     *   new EventSource(`${API}/viz/run2d/stream?file=${encodeURIComponent(filename)}`)
-     */
+    @Value("${viz.workDir}")
+    private String workDir;
+
+    @Value("${viz.outDir}")
+    private String outDir;
+
+    @Value("${app.data.npyDir}")
+    private String npyDir;
+
+    @Value("${app.visualization.sse-timeout-ms:900000}")
+    private long sseTimeoutMs;
+
+    private final AsyncTaskExecutor visualizationTaskExecutor;
+
+    public Viz2DStreamController(@Qualifier("visualizationTaskExecutor") AsyncTaskExecutor visualizationTaskExecutor) {
+        this.visualizationTaskExecutor = visualizationTaskExecutor;
+    }
+
     @GetMapping(path = "/run2d/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSPECTOR')")
     public SseEmitter run2dStream(
-            @RequestParam(value = "file", required = false) String file,
-            @RequestParam(value = "lang", required = false) String lang
-    ) {
-        SseEmitter emitter = new SseEmitter(0L); // 不超时
+            @RequestParam(value = "file", required = false) @Size(max = 255) String file,
+            @RequestParam(value = "lang", required = false) @Size(max = 8) String lang) {
+        String singleInput = normalizeAndValidateFile(file);
+        SseEmitter emitter = new SseEmitter(sseTimeoutMs);
+        AtomicReference<Process> processReference = new AtomicReference<>();
+        AtomicReference<Future<?>> taskReference = new AtomicReference<>();
+        AtomicBoolean cancelled = new AtomicBoolean(false);
 
-        Executors.newSingleThreadExecutor().submit(() -> {
-            Process p = null;
-            try {
-                // 1) 解析/校验 file 参数
-                String singleInput = normalizeAndValidateFile(file);
-
-                // 2) 构建进程
-                ProcessBuilder pb = new ProcessBuilder(pythonExe, script2d)
-                        .directory(new File(workDir));
-                Map<String, String> env = pb.environment();
-                env.put("MPLBACKEND", "Agg");
-                env.put("VIZ_OUT_DIR", outDir);
-                env.put("MPLCONFIGDIR", new File(outDir, ".matplotlib").getAbsolutePath());
-                env.put("VIZ_NPY_DIR", npyDir);
-                env.put("VIZ_LANG", normalizeLang(lang));
-                if (StringUtils.hasText(singleInput)) {
-                    env.put("VIZ_INPUT_FILE", singleInput); // 仅跑该文件
-                }
-                pb.redirectErrorStream(true);
-
-                // 3) 启动并转发 stdout
-                p = pb.start();
-                try (BufferedReader br = new BufferedReader(
-                        new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
-                    String line;
-                    while ((line = br.readLine()) != null) {
-                        emitter.send(line);
-                    }
-                }
-
-                // 4) 退出码
-                int code = p.waitFor();
-                // 建议先发 DONE 再发 EXIT，更利于前端判定成功
-                // emitter.send("DONE");
-                emitter.send("EXIT " + code);
-                emitter.complete();
-
-            } catch (Exception e) {
-                try { emitter.send("ERROR " + e.getMessage()); } catch (IOException ignore) {}
-                emitter.completeWithError(e);
-            } finally {
-                if (p != null) p.destroyForcibly();
+        Runnable cancel = () -> {
+            if (!cancelled.compareAndSet(false, true)) {
+                return;
             }
-        });
+            Process process = processReference.get();
+            if (process != null && process.isAlive()) {
+                process.destroyForcibly();
+            }
+            Future<?> task = taskReference.get();
+            if (task != null) {
+                task.cancel(true);
+            }
+        };
+        emitter.onCompletion(cancel);
+        emitter.onTimeout(cancel);
+        emitter.onError(error -> cancel.run());
 
+        try {
+            Future<?> task = visualizationTaskExecutor.submit(
+                    () -> runVisualization(emitter, processReference, cancelled, singleInput, lang));
+            taskReference.set(task);
+            if (cancelled.get()) {
+                task.cancel(true);
+            }
+        } catch (RuntimeException exception) {
+            emitter.completeWithError(new IllegalStateException("Visualization task queue is full"));
+        }
         return emitter;
     }
 
-    /**
-     * 仅允许 .npy；允许传文件名（相对根数据目录由 Python拼接）或绝对路径；
-     * 拒绝 '..'、奇怪的分隔符注入。为空则返回 null（表示跑整个目录）。
-     */
+    private void runVisualization(SseEmitter emitter, AtomicReference<Process> processReference,
+                                  AtomicBoolean cancelled, String singleInput, String lang) {
+        Process process = null;
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder(pythonExe, script2d)
+                    .directory(new File(workDir));
+            Map<String, String> environment = processBuilder.environment();
+            environment.put("MPLBACKEND", "Agg");
+            environment.put("VIZ_OUT_DIR", outDir);
+            environment.put("MPLCONFIGDIR", new File(outDir, ".matplotlib").getAbsolutePath());
+            environment.put("VIZ_NPY_DIR", npyDir);
+            environment.put("VIZ_LANG", normalizeLang(lang));
+            if (StringUtils.hasText(singleInput)) {
+                environment.put("VIZ_INPUT_FILE", singleInput);
+            }
+            processBuilder.redirectErrorStream(true);
+
+            process = processBuilder.start();
+            processReference.set(process);
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null && !cancelled.get()) {
+                    emitter.send(SseEmitter.event().name("log").data(line));
+                }
+            }
+
+            int exitCode = process.waitFor();
+            if (!cancelled.get()) {
+                emitter.send(SseEmitter.event().name("exit").data(exitCode));
+                emitter.complete();
+            }
+        } catch (Exception exception) {
+            if (!cancelled.get()) {
+                try {
+                    emitter.send(SseEmitter.event().name("error").data("2D visualization failed"));
+                } catch (IOException ignored) {
+                    // The client connection is already closed.
+                }
+                emitter.complete();
+            }
+        } finally {
+            if (process != null && process.isAlive()) {
+                process.destroyForcibly();
+            }
+        }
+    }
+
     private String normalizeAndValidateFile(String file) {
-        if (!StringUtils.hasText(file)) return null;
-        // URL decode（前端一般 encodeURIComponent 过）
-        String decoded = URLDecoder.decode(file, StandardCharsets.UTF_8);
-        // 基础校验：拒绝路径穿越
-        if (decoded.contains("..") || decoded.contains("\0")) {
-            throw new IllegalArgumentException("Illegal path segment in file param");
+        if (!StringUtils.hasText(file)) {
+            return null;
         }
-        // 只允许 npy
-        String lower = decoded.toLowerCase();
-        if (!lower.endsWith(".npy")) {
-            throw new IllegalArgumentException("Only .npy files are accepted");
+        Path suppliedPath = Path.of(file);
+        if (suppliedPath.isAbsolute() || suppliedPath.getNameCount() != 1
+                || !suppliedPath.getFileName().toString().equals(file)
+                || !file.toLowerCase().endsWith(".npy")) {
+            throw new IllegalArgumentException("file must be a .npy file name");
         }
-        // 统一分隔符
-        decoded = decoded.replace('\\', '/');
-        return decoded;
+        return file;
     }
 
     private String normalizeLang(String lang) {
-        if (!StringUtils.hasText(lang)) return "zh";
+        if (!StringUtils.hasText(lang)) {
+            return "zh";
+        }
         return lang.toLowerCase().startsWith("en") ? "en" : "zh";
     }
 }
-
-
